@@ -30,7 +30,6 @@ export default defineNuxtConfig({
     clearScreen: false,
     envPrefix: ['VITE_', 'TAURI_'],
     server: {
-      // Tauri requires a consistent port
       strictPort: true,
     },
     plugins: [
@@ -42,7 +41,7 @@ export default defineNuxtConfig({
       stylistic: true,
     },
   },
-  icon: {
+  icon: { // for tailwind v4
     mode: 'css',
     cssLayer: 'base',
   },

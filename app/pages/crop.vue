@@ -1,13 +1,18 @@
 <script setup lang="ts">
-const scans = useScansStore()
+const scan = useScanStore()
 </script>
 
 <template>
-  <image-grid>
-    <filecrop-preview
-      v-for="image in scans.data"
-      :key="image"
-      :image="image"
-    />
-  </image-grid>
+  <section class="h-full">
+    <template v-if="scan.data">
+      <img
+        :src="scan.data.image"
+        class="h-full w-full object-contain"
+      >
+    </template>
+
+    <template v-else>
+      pick scan in right bar ┻━┻ ︵ ＼( °□° )／ ︵ ┻━┻
+    </template>
+  </section>
 </template>
