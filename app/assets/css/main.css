@@ -5,6 +5,13 @@
   --font-sans: "Nunito", "sans-serif";
 }
 
-  button {
-    @apply leading-none;
-  }
+button {
+  @apply leading-none;
+}
+
+@layer components {
+  .bg-workspace {
+    background-image: radial-gradient(circle at 1px 1px, theme(colors.zinc.700) 1px, transparent 0);
+    @apply bg-size-[theme(spacing.6)_theme(spacing.6)]
+  } 
+}

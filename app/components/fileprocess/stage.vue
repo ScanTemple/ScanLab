@@ -4,11 +4,21 @@ const stageLayers = useStageLayersStore()
 
 <template>
   <ul class="space-x-2">
-    <fileprocess-stage-item
+    <template
       v-for="layer in stageLayers.defined"
       :key="layer.uuid"
-      class="inline-block"
-      :reference="layer.reference"
-    />
+    >
+      <fileprocess-stage-item
+
+        class="inline-block"
+        :reference="layer.reference"
+      />
+
+      <icon
+        v-if="layer !== stageLayers.defined.at(-1)"
+        name="ic:baseline-chevron-right"
+        class="text-neutral-300/50"
+      />
+    </template>
   </ul>
 </template>

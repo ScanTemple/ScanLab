@@ -10,6 +10,7 @@ export const useScanStore = defineStore('scan', () => {
   const data = computed(() => _uuid.value ? scans.data.find(e => e.uuid === _uuid.value) : undefined)
 
   // todo: won't trigger if same value setted twice... maybe
+  //       but _uuid need to be checked
   watch(data, (value) => {
     // scan has been removed
     if (value?.uuid !== _uuid.value) {
