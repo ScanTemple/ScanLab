@@ -21,7 +21,7 @@
     "@tauri-apps/plugin-fs": "~2.4.1",
     "@vueuse/nuxt": "13.6.0",
     "eslint": "^9.32.0",
-    "nuxt": "^4.0.1",
+    "nuxt": "^4.0.2",
     "pinia": "^3.0.3",
     "tailwind-merge": "^3.3.1",
     "tailwind-variants": "^2.0.1",
