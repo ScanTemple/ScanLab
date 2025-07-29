@@ -168,7 +168,7 @@ dependencies = [
  "futures-lite",
  "parking",
  "polling",
-g "rustix",
+ "rustix",
  "slab",
  "windows-sys 0.60.2",
 ]
