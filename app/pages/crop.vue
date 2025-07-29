@@ -6,39 +6,44 @@ const scan = useScanStore()
 
 const workspace = useTemplateRef('workspace')
 
-const scaleLevel = ref(1)
+const scaleStep = 0.1
+const scaleLevelDefault = 0.65
+const scaleLevel = ref(scaleLevelDefault)
+
+const postionDefault = {
+  x: 0,
+  y: 0,
+}
+
+const postion = reactive({
+  x: postionDefault.x,
+  y: postionDefault.y,
+})
 
 const styles = computed(() => ({
-  // transform: 'translateX(-50%) translateY(-50%)',
-  transform: `scale(${scaleLevel.value})`,
+  transform: `translateX(${postion.x}px) translateY(${postion.y}px) scale(${scaleLevel.value})`,
 }))
 
-// onMounted(() => {
 useEventListener(workspace, 'wheel', (e) => {
-  const SCALE_STEP = 0.1
-
   console.log('mouse wheel delta:', e.deltaX, e.deltaY, e.deltaZ)
 
   const delta = e.deltaY < 0 ? 1 : -1
 
-  // Экспоненциальное изменение масштаба для постоянной скорости
-  scaleLevel.value *= (1 + SCALE_STEP * delta)
-
-  // Ограничиваем масштаб (опционально)
-  scaleLevel.value = Math.max(0.1, Math.min(scaleLevel.value, 10)) // Минимум 0.1, максимум 10
-
-  console.log(scaleLevel.value)
+  scaleLevel.value *= (1 + scaleStep * delta)
+  scaleLevel.value = Math.max(0.1, Math.min(scaleLevel.value, 10))
 })
 
-useEventListener(workspace, 'keydown', () => {
-  console.log('x')
-})
+useEventListener(workspace, 'click', (e) => {
+  // todo: debug
+  //       Надо на кнопку какую-то назначить в интерфейсе...
+  //       ...потом
+  if (e.button === 0) {
+    scaleLevel.value = scaleLevelDefault
 
-useEventListener(workspace, 'click', () => {
-  scaleLevel.value = 1
-  console.log('x')
+    postion.x = postionDefault.x
+    postion.y = postionDefault.y
+  }
 })
-// })
 </script>
 
 <template>

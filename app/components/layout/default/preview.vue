@@ -14,8 +14,8 @@ const scan = useScanStore()
 const styles = tv({
   variants: {
     button: {
-      [0 as number]: 'cursor-pointer hover:bg-zinc-700 text-neutral-300/50 hover:text-amber-300',
-      [1 as number]: 'bg-zinc-700 text-amber-300 pointer-events-none',
+      [0 as number]: 'cursor-pointer hover:bg-zinc-700 text-neutral-300/50 hover:text-neutral-300 transition-colors',
+      [1 as number]: 'bg-zinc-700 pointer-events-none border-r-zinc-300',
     },
   },
 })
@@ -24,19 +24,17 @@ const styles = tv({
 <template>
   <button
     type="button"
-    class="p-2 rounded shadow border-x border-zinc-700"
+    class="p-2 space-y-2 border border-zinc-700 w-full"
     :class="styles({ button: Number(scan.data?.uuid === uuid) })"
     @click="scan.pick(uuid)"
   >
-    <section class="flex flex-col gap-2">
-      <img
-        :src="image"
-        class="w-full rounded"
-      >
+    <img
+      :src="image"
+      class="w-full"
+    >
 
-      <p class="wrap-break-word">
-        {{ normalized.replaceAll(/_|-/g, ' ') }}
-      </p>
-    </section>
+    <p class="truncate uppercase font-mono text-xs px-2">
+      {{ normalized.replaceAll(/_|-/g, ' ') }}
+    </p>
   </button>
 </template>

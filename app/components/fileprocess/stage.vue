@@ -9,7 +9,6 @@ const stageLayers = useStageLayersStore()
       :key="layer.uuid"
     >
       <fileprocess-stage-item
-
         class="inline-block"
         :reference="layer.reference"
       />

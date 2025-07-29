@@ -80,9 +80,9 @@ const scans = useScansStore()
         </section>
       </aside>
 
-      <aside class="shadow overflow-hidden bg-zinc-800 w-64 col-start-3 pointer-events-auto">
+      <aside class="shadow overflow-hidden bg-zinc-800/30 col-start-3 pointer-events-auto backdrop-blur-md w-48">
         <section class="h-full py-2">
-          <section class="space-y-2 px-2 overflow-y-auto h-full">
+          <section class="space-y-2 px-2 overflow-y-auto overflow-x-hidden h-full">
             <layout-default-preview
               v-for="scan in scans.data"
               v-bind="scan"
@@ -92,7 +92,7 @@ const scans = useScansStore()
         </section>
       </aside>
 
-      <footer class="p-2 flex justify-center col-span-full bg-zinc-800 shadow leading-none row-start-2 pointer-events-auto">
+      <footer class="p-2 flex justify-center col-span-full bg-zinc-800/30 shadow leading-none row-start-2 pointer-events-auto backdrop-blur-md">
         <fileprocess-stage />
       </footer>
     </section>
