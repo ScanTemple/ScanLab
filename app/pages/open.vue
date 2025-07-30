@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { useMagicKeys } from '@vueuse/core'
+import { useMagicKeys, watchArray } from '@vueuse/core'
 
 definePageMeta({
   layout: 'open',
@@ -22,33 +22,45 @@ const previewStyles = tv({
   },
 })
 
-const { ctrl, shift } = useMagicKeys()
+const { ctrl, shift, escape, ctrl_a, alt_a } = useMagicKeys({ passive: true })
 
-const isSelectMode = computed(() => {
-  return ctrl?.value || shift?.value || false
+watchArray(() => [escape?.value, alt_a?.value], () => {
+  last.value = undefined
+
+  for (const file of files.value) {
+    thumbnails.value[file]!.seelcted = false
+  }
 })
+
+watch(() => ctrl_a?.value, () => {
+  last.value = undefined
+
+  for (const file of files.value) {
+    thumbnails.value[file]!.seelcted = true
+  }
+})
+
+const isSelectMode = computed(() => ctrl?.value || shift?.value || false)
 
 const last = ref(undefined as number | undefined)
 
 function toggle(value: DataThumbnail, index: number) {
+  const mode = !value.seelcted
+
   if (ctrl?.value) {
     last.value = index
-    value.seelcted = !value.seelcted
+    value.seelcted = mode
   }
 
   if (shift?.value) {
-    if (last.value === undefined) {
-      value.seelcted = true
-    }
+    value.seelcted = mode
 
-    else {
-      const state = !value.seelcted
-
+    if (last.value !== undefined) {
       const start = Math.min(last.value, index)
       const end = Math.max(last.value, index)
 
       for (let i = start; i <= end; i++) {
-        thumbnails.value[files.value[i]!]!.seelcted = state
+        thumbnails.value[files.value[i]!]!.seelcted = mode
       }
     }
 
@@ -65,6 +77,9 @@ const help = [{
 }, {
   keys: ['SHIFT', 'LMB'],
   label: 'multiple select',
+}, {
+  keys: ['ESC'],
+  label: 'clear select',
 }] as const
 
 const helpStyles = tv({
@@ -73,7 +88,8 @@ const helpStyles = tv({
     button: {
       LMB: 'text-sky-300',
       CTRL: 'text-amber-300',
-      SHIFT: 'text-rose-300',
+      SHIFT: 'text-lime-300',
+      ESC: 'text-red-300',
     },
   },
 })
@@ -82,10 +98,10 @@ const helpStyles = tv({
 <template>
   <section>
     <button @click="temp.selectDirectoryAndListFiles">
-      Select Directory : {{ shift }}
+      Select Directory: {{ ctrl_a }}
     </button>
 
-    <section class="grid grid-cols-[auto_1fr_auto] gap-2 items-start">
+    <section class="grid grid-cols-[1fr_auto_1fr] gap-2 items-start">
       <div class="grid grid-cols-[auto_auto_1fr] sticky top-2 gap-2 opacity-30">
         <template
           v-for="{ keys, label }, index in help"
@@ -106,7 +122,7 @@ const helpStyles = tv({
           </div>
         </template>
 
-        <div class="w-[1px] bg-zinc-700 col-start-2 row-start-1 row-span-3" />
+        <div class="w-[1px] bg-zinc-700 col-start-2 row-start-1 row-span-4" />
       </div>
 
       <div class="grid grid-cols-[repeat(5,auto)] gap-2 justify-center">
@@ -144,8 +160,9 @@ const helpStyles = tv({
           </template>
         </div>
       </div>
+
       <div>
-        <!-- dummy -->
+        dummy
       </div>
     </section>
   </section>
