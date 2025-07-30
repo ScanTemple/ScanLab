@@ -1,8 +1,12 @@
 <script setup lang="ts">
 import { invoke } from '@tauri-apps/api/core'
-import { ref, onMounted } from 'vue'
+import { path } from '@tauri-apps/api'
+import { ref } from 'vue'
+import { open } from '@tauri-apps/plugin-dialog'
+import { readDir, BaseDirectory } from '@tauri-apps/plugin-fs'
 
-const thumbnailSrc = ref('')
+const files = ref<string[]>([])
+const thumbnails = ref<Record<string, string>>({})
 
 async function getThumbnail(filePath: string) {
   try {
@@ -10,24 +14,65 @@ async function getThumbnail(filePath: string) {
       sourcePath: filePath,
       size: 200,
     })
-    return `data:image/avif;base64,${base64}`
+    return `data:image/webp;base64,${base64}`
   }
   catch (e) {
-    console.error('Error generating thumbnail:', e)
+    console.error(`Error generating thumbnail ${filePath}: ${e}`)
     return ''
   }
 }
 
-onMounted(async () => {
-  thumbnailSrc.value = await getThumbnail('/home/etsune/Pictures/scans/2022-12-05-0049.tif')
-})
+async function selectDirectoryAndListFiles() {
+  const selected = await open({
+    directory: true,
+    multiple: false,
+    title: 'Select a directory with images',
+  })
+  if (typeof selected === 'string') {
+    const entries = await readDir(selected, { baseDir: BaseDirectory.AppLocalData })
+    files.value = await Promise.all(entries
+      .filter(e => e.name && /\.(png|jpe?g|tiff?)$/i.test(e.name))
+      // .map(e => selected + '/' + e.name)
+      .map(e => path.join(selected, e.name)))
+  }
+}
+
+// TODO: Fix UI thread blocking issue
+watch(files, async (newFiles) => {
+  thumbnails.value = Object.fromEntries(newFiles.map(f => [f, '']))
+  for (const file of newFiles) {
+    const thumbnail = await getThumbnail(file)
+    if (thumbnail) {
+      thumbnails.value[file] = thumbnail
+    }
+  }
+}, { immediate: true })
 </script>
 
 <template>
   <section>
-    <img
-      :src="thumbnailSrc"
-      alt="Thumbnail"
+    <button @click="selectDirectoryAndListFiles">
+      Select Directory
+    </button>
+
+    <div
+      v-for="file in files"
+      :key="file"
+      class="inline-block m-2 border rounded flex items-center justify-center bg-gray-100 relative"
     >
+      <template v-if="thumbnails[file]">
+        <img
+          :src="thumbnails[file]"
+          alt="Thumbnail"
+          class="object-cover rounded"
+        >
+      </template>
+      <template v-else>
+        <Icon
+          name="ic:image"
+          class="cursor-pointer text-4xl"
+        />
+      </template>
+    </div>
   </section>
 </template>
