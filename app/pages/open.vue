@@ -1,78 +1,152 @@
 <script setup lang="ts">
-import { invoke } from '@tauri-apps/api/core'
-import { path } from '@tauri-apps/api'
-import { ref } from 'vue'
-import { open } from '@tauri-apps/plugin-dialog'
-import { readDir, BaseDirectory } from '@tauri-apps/plugin-fs'
+import { useMagicKeys } from '@vueuse/core'
 
-const files = ref<string[]>([])
-const thumbnails = ref<Record<string, string>>({})
+definePageMeta({
+  layout: 'open',
+})
 
-async function getThumbnail(filePath: string) {
-  try {
-    const base64 = await invoke('generate_thumbnail_from_path', {
-      sourcePath: filePath,
-      size: 200,
-    })
-    return `data:image/webp;base64,${base64}`
+const temp = useTempStore()
+const files = computed(() => temp.files)
+const thumbnails = computed(() => temp.thumbnails)
+
+const previewStyles = tv({
+  base: 'absolute inset-0 transition-colors shadow outline hover:outline-neutral-300 hover:text-neutral-300',
+  variants: {
+    select: {
+      false: 'cursor-pointer',
+    },
+    active: {
+      true: ' bg-gray-800/80 text-sky-300 outline-sky-300',
+      false: 'bg-neutral-800/80 text-neutral-300/80 outline-transparent',
+    },
+  },
+})
+
+const { ctrl, shift } = useMagicKeys()
+
+const isSelectMode = computed(() => {
+  return ctrl?.value || shift?.value || false
+})
+
+const last = ref(undefined as number | undefined)
+
+function toggle(value: DataThumbnail, index: number) {
+  if (ctrl?.value) {
+    last.value = index
+    value.seelcted = !value.seelcted
   }
-  catch (e) {
-    console.error(`Error generating thumbnail ${filePath}: ${e}`)
-    return ''
-  }
-}
 
-async function selectDirectoryAndListFiles() {
-  const selected = await open({
-    directory: true,
-    multiple: false,
-    title: 'Select a directory with images',
-  })
-  if (typeof selected === 'string') {
-    const entries = await readDir(selected, { baseDir: BaseDirectory.AppLocalData })
-    files.value = await Promise.all(entries
-      .filter(e => e.name && /\.(png|jpe?g|tiff?)$/i.test(e.name))
-      // .map(e => selected + '/' + e.name)
-      .map(e => path.join(selected, e.name)))
-  }
-}
-
-// TODO: Fix UI thread blocking issue
-watch(files, async (newFiles) => {
-  thumbnails.value = Object.fromEntries(newFiles.map(f => [f, '']))
-  for (const file of newFiles) {
-    const thumbnail = await getThumbnail(file)
-    if (thumbnail) {
-      thumbnails.value[file] = thumbnail
+  if (shift?.value) {
+    if (last.value === undefined) {
+      value.seelcted = true
     }
+
+    else {
+      const state = !value.seelcted
+
+      const start = Math.min(last.value, index)
+      const end = Math.max(last.value, index)
+
+      for (let i = start; i <= end; i++) {
+        thumbnails.value[files.value[i]!]!.seelcted = state
+      }
+    }
+
+    last.value = index
   }
-}, { immediate: true })
+}
+
+const help = [{
+  keys: ['LMB'],
+  label: 'full page preview',
+}, {
+  keys: ['CTRL', 'LMB'],
+  label: 'single select',
+}, {
+  keys: ['SHIFT', 'LMB'],
+  label: 'multiple select',
+}] as const
+
+const helpStyles = tv({
+  base: '',
+  variants: {
+    button: {
+      LMB: 'text-sky-300',
+      CTRL: 'text-amber-300',
+      SHIFT: 'text-rose-300',
+    },
+  },
+})
 </script>
 
 <template>
   <section>
-    <button @click="selectDirectoryAndListFiles">
-      Select Directory
+    <button @click="temp.selectDirectoryAndListFiles">
+      Select Directory : {{ shift }}
     </button>
 
-    <div
-      v-for="file in files"
-      :key="file"
-      class="inline-block m-2 border rounded flex items-center justify-center bg-gray-100 relative"
-    >
-      <template v-if="thumbnails[file]">
-        <img
-          :src="thumbnails[file]"
-          alt="Thumbnail"
-          class="object-cover rounded"
+    <section class="grid grid-cols-[auto_1fr_auto] gap-2 items-start">
+      <div class="grid grid-cols-[auto_auto_1fr] sticky top-2 gap-2 opacity-30">
+        <template
+          v-for="{ keys, label }, index in help"
+          :key="index"
         >
-      </template>
-      <template v-else>
-        <Icon
-          name="ic:image"
-          class="cursor-pointer text-4xl"
-        />
-      </template>
-    </div>
+          <div class="space-x-2 text-end col-start-1">
+            <file-open-help-button
+              v-for="key in keys"
+              :key="key"
+              :class="helpStyles({ button: key })"
+            >
+              {{ key }}
+            </file-open-help-button>
+          </div>
+
+          <div class="col-start-3">
+            {{ label }}
+          </div>
+        </template>
+
+        <div class="w-[1px] bg-zinc-700 col-start-2 row-start-1 row-span-3" />
+      </div>
+
+      <div class="grid grid-cols-[repeat(5,auto)] gap-2 justify-center">
+        <div
+          v-for="file, index in files"
+          :key="file"
+          class="flex items-center justify-center relative"
+        >
+          <template v-if="thumbnails[file]">
+            <img
+              :src="thumbnails[file].cover"
+              alt="Thumbnail"
+              class="object-cover border rounded border-zinc-700 shadow"
+            >
+
+            <button
+              :class="previewStyles({ active: thumbnails[file].seelcted, select: isSelectMode })"
+              @click="toggle(thumbnails[file], index)"
+            >
+              <div class="absolute inset-0 flex items-center justify-center text-3xl">
+                {{ 1 + index }}
+              </div>
+
+              <p class="absolute left-2 right-2 bottom-2 font-mono uppercase text-xs wrap-break-word">
+                {{ thumbnails[file].name.replaceAll('.', ' ') }}
+              </p>
+            </button>
+          </template>
+
+          <template v-else>
+            <Icon
+              name="ic:image"
+              class="cursor-pointer text-4xl"
+            />
+          </template>
+        </div>
+      </div>
+      <div>
+        <!-- dummy -->
+      </div>
+    </section>
   </section>
 </template>
