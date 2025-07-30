@@ -1,6 +1,12 @@
 <script setup lang="ts">
-const scans = useScansStore()
 // const stages = useStagesStore()
+import { useRoute } from 'vue-router'
+
+const scans = useScansStore()
+
+const hideSidebarsPages = ['/open']
+const route = useRoute()
+const hideSidebars = computed(() => hideSidebarsPages.includes(route.path))
 </script>
 
 <template>
@@ -61,7 +67,10 @@ const scans = useScansStore()
     </main>
 
     <section class="grid grid-cols-[auto_1fr_auto] grid-rows-[1fr_auto] gap-2 fixed left-2 right-2 bottom-2 top-2 pointer-events-none">
-      <aside class="shadow overflow-hidden bg-zinc-800/30 col-start-1 pointer-events-auto backdrop-blur-md w-64">
+      <aside
+        v-if="!hideSidebars"
+        class="shadow overflow-hidden bg-zinc-800/30 col-start-1 pointer-events-auto backdrop-blur-md w-64"
+      >
         <section class="h-full py-2">
           <section class="space-y-2 px-2 overflow-y-auto overflow-x-hidden h-full">
             <section id="toolbar" />
@@ -69,7 +78,10 @@ const scans = useScansStore()
         </section>
       </aside>
 
-      <aside class="shadow overflow-hidden bg-zinc-800/30 col-start-3 pointer-events-auto backdrop-blur-md w-48">
+      <aside
+        v-if="!hideSidebars"
+        class="shadow overflow-hidden bg-zinc-800/30 col-start-3 pointer-events-auto backdrop-blur-md w-48"
+      >
         <section class="h-full py-2">
           <section class="space-y-2 px-2 overflow-y-auto overflow-x-hidden h-full">
             <layout-default-preview

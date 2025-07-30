@@ -33,6 +33,23 @@ useEventListener(workspace, 'wheel', (e) => {
   scaleLevel.value = Math.max(0.1, Math.min(scaleLevel.value, 10))
 })
 
+// Зум с учетом позиции курсора
+// useEventListener(workspace, 'wheel', (e) => {
+//   e.preventDefault()
+//   if (!workspace.value) return
+//   const rect = workspace.value.getBoundingClientRect()
+//   const mouseX = e.clientX - rect.left
+//   const mouseY = e.clientY - rect.top
+
+//   const prevScale = scaleLevel.value
+//   const delta = e.deltaY < 0 ? 1 : -1
+//   scaleLevel.value *= (1 + scaleStep * delta)
+//   scaleLevel.value = Math.max(0.1, Math.min(scaleLevel.value, 10))
+
+//   postion.x -= (mouseX - postion.x) * (scaleLevel.value / prevScale - 1)
+//   postion.y -= (mouseY - postion.y) * (scaleLevel.value / prevScale - 1)
+// }, { passive: false })
+
 useEventListener(workspace, 'click', (e) => {
   // todo: debug
   //       Надо на кнопку какую-то назначить в интерфейсе...

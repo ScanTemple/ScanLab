@@ -1,6 +1,25 @@
+use pipeline::{ProcessingPipeline, ProcessingStage};
+use std::sync::{Arc, Mutex};
+use tauri::{command, Builder, State};
+
+mod commands;
+mod pipeline;
+mod utils;
+
+pub struct AppState {
+    pub pipeline: Arc<Mutex<ProcessingPipeline>>,
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
-    tauri::Builder::default()
+    Builder::default()
+        .manage(AppState {
+            pipeline: Arc::new(Mutex::new(ProcessingPipeline { steps: vec![] })),
+        })
+        .invoke_handler(tauri::generate_handler![
+            add_stage,
+            commands::generate_thumbnail_from_path
+        ])
         .plugin(tauri_plugin_fs::init())
         .plugin(tauri_plugin_dialog::init())
         .setup(|app| {
@@ -15,4 +34,10 @@ pub fn run() {
         })
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
+}
+
+#[command]
+fn add_stage(state: State<'_, AppState>, stage: ProcessingStage) {
+    let mut pipeline = state.pipeline.lock().unwrap();
+    pipeline.steps.push(stage);
 }
