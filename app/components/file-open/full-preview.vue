@@ -1,12 +1,13 @@
 <script lang="ts" setup>
-import { useToggle } from '@vueuse/core'
-
 defineProps<{
   src: string
   alt: string
+  state: boolean
 }>()
 
-const [state, toggle] = useToggle(false)
+defineEmits<{
+  (e: 'toggle', value: boolean): void
+}>()
 </script>
 
 <template>
@@ -23,7 +24,7 @@ const [state, toggle] = useToggle(false)
     <button
       type="button"
       class="fixed top-2 right-2 text-neutral-300 hover:text-neutral-300/30 transition-colors cursor-pointer"
-      @click="() => state = false"
+      @click="$emit('toggle', false)"
     >
       <Icon
         name="ic:baseline-close"
@@ -32,7 +33,7 @@ const [state, toggle] = useToggle(false)
     </button>
   </section>
 
-  <slot v-bind="{ state, toggle }" />
+  <slot />
 
   <!-- https://youtu.be/5TQjhckMcr4 -->
 </template>

@@ -22,13 +22,26 @@ const previewStyles = tv({
   },
 })
 
-const { ctrl, shift, escape, ctrl_a, alt_a } = useMagicKeys({ passive: true })
+const preview = reactive({
+  state: false,
+  alt: '',
+  src: '',
+})
 
-watchArray(() => [escape?.value, alt_a?.value], () => {
-  last.value = undefined
+const { ctrl, shift, ctrl_a, alt_a, escape } = useMagicKeys({ passive: true })
 
-  for (const file of files.value) {
-    thumbnails.value[file]!.selected = false
+watchArray(() => [alt_a?.value, escape?.value], ([alt_a, by_escape]) => {
+  if (preview.state && by_escape) {
+    preview.state = false
+    return
+  }
+
+  if (alt_a || by_escape) {
+    last.value = undefined
+
+    for (const file of files.value) {
+      thumbnails.value[file]!.selected = false
+    }
   }
 })
 
@@ -44,7 +57,7 @@ const isSelectMode = computed(() => ctrl?.value || shift?.value || false)
 
 const last = ref(undefined as number | undefined)
 
-function toggle(value: DataThumbnail, index: number, preview: () => void) {
+function toggle(value: DataThumbnail, index: number) {
   const mode = !value.selected
 
   if (ctrl?.value) {
@@ -68,7 +81,9 @@ function toggle(value: DataThumbnail, index: number, preview: () => void) {
   }
 
   else {
-    preview()
+    preview.src = value.cover
+    preview.alt = value.name
+    preview.state = true
   }
 }
 
@@ -135,31 +150,25 @@ const helpStyles = tv({
           :key="file"
           class="flex items-center justify-center relative"
         >
-          <template v-if="thumbnails[file]">
+          <template v-if="thumbnails[file] && thumbnails[file].cover">
             <img
               :src="thumbnails[file].cover"
               :alt="thumbnails[file].name"
               class="object-cover border rounded border-zinc-700 shadow"
             >
 
-            <FileOpenFullPreview
-              v-slot="{ toggle: preview }"
-              :src="thumbnails[file].cover"
-              :alt="thumbnails[file].name"
+            <button
+              :class="previewStyles({ active: thumbnails[file].selected, select: isSelectMode })"
+              @click="toggle(thumbnails[file], index)"
             >
-              <button
-                :class="previewStyles({ active: thumbnails[file].selected, select: isSelectMode })"
-                @click="toggle(thumbnails[file], index, preview)"
-              >
-                <div class="absolute inset-0 flex items-center justify-center text-4xl">
-                  {{ 1 + index }}
-                </div>
+              <div class="absolute inset-0 flex items-center justify-center text-4xl">
+                {{ 1 + index }}
+              </div>
 
-                <p class="absolute left-2 right-2 bottom-2 font-mono uppercase text-xs wrap-break-word">
-                  {{ thumbnails[file].name.replaceAll('.', ' ') }}
-                </p>
-              </button>
-            </FileOpenFullPreview>
+              <p class="absolute left-2 right-2 bottom-2 font-mono uppercase text-xs wrap-break-word">
+                {{ thumbnails[file].name.replaceAll('.', ' ') }}
+              </p>
+            </button>
           </template>
 
           <template v-else>
@@ -175,5 +184,10 @@ const helpStyles = tv({
         dummy
       </div>
     </section>
+
+    <FileOpenFullPreview
+      v-bind="preview"
+      @toggle="preview.state = $event"
+    />
   </section>
 </template>
