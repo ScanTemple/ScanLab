@@ -6,7 +6,7 @@ import { readDir, BaseDirectory } from '@tauri-apps/plugin-fs'
 export type DataThumbnail = {
   cover: string
   name: string
-  seelcted: boolean
+  selected: boolean
 }
 
 export const useTempStore = defineStore('temp', () => {
@@ -57,7 +57,7 @@ export const useTempStore = defineStore('temp', () => {
 
   // TODO: Fix UI thread blocking issue
   watch(files, async (newFiles) => {
-    thumbnails.value = Object.fromEntries(newFiles.map(f => [f, { cover: '', name: '', seelcted: false } satisfies DataThumbnail]))
+    thumbnails.value = Object.fromEntries(newFiles.map(f => [f, { cover: '', name: '', selected: false } satisfies DataThumbnail]))
 
     for (const file of newFiles) {
       path.basename(file).then((e) => {

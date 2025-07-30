@@ -28,7 +28,7 @@ watchArray(() => [escape?.value, alt_a?.value], () => {
   last.value = undefined
 
   for (const file of files.value) {
-    thumbnails.value[file]!.seelcted = false
+    thumbnails.value[file]!.selected = false
   }
 })
 
@@ -36,7 +36,7 @@ watch(() => ctrl_a?.value, () => {
   last.value = undefined
 
   for (const file of files.value) {
-    thumbnails.value[file]!.seelcted = true
+    thumbnails.value[file]!.selected = true
   }
 })
 
@@ -44,27 +44,31 @@ const isSelectMode = computed(() => ctrl?.value || shift?.value || false)
 
 const last = ref(undefined as number | undefined)
 
-function toggle(value: DataThumbnail, index: number) {
-  const mode = !value.seelcted
+function toggle(value: DataThumbnail, index: number, preview: () => void) {
+  const mode = !value.selected
 
   if (ctrl?.value) {
     last.value = index
-    value.seelcted = mode
+    value.selected = mode
   }
 
-  if (shift?.value) {
-    value.seelcted = mode
+  else if (shift?.value) {
+    value.selected = mode
 
     if (last.value !== undefined) {
       const start = Math.min(last.value, index)
       const end = Math.max(last.value, index)
 
       for (let i = start; i <= end; i++) {
-        thumbnails.value[files.value[i]!]!.seelcted = mode
+        thumbnails.value[files.value[i]!]!.selected = mode
       }
     }
 
     last.value = index
+  }
+
+  else {
+    preview()
   }
 }
 
@@ -98,7 +102,7 @@ const helpStyles = tv({
 <template>
   <section>
     <button @click="temp.selectDirectoryAndListFiles">
-      Select Directory: {{ ctrl_a }}
+      Select Directory
     </button>
 
     <section class="grid grid-cols-[1fr_auto_1fr] gap-2 items-start">
@@ -134,22 +138,28 @@ const helpStyles = tv({
           <template v-if="thumbnails[file]">
             <img
               :src="thumbnails[file].cover"
-              alt="Thumbnail"
+              :alt="thumbnails[file].name"
               class="object-cover border rounded border-zinc-700 shadow"
             >
 
-            <button
-              :class="previewStyles({ active: thumbnails[file].seelcted, select: isSelectMode })"
-              @click="toggle(thumbnails[file], index)"
+            <FileOpenFullPreview
+              v-slot="{ toggle: preview }"
+              :src="thumbnails[file].cover"
+              :alt="thumbnails[file].name"
             >
-              <div class="absolute inset-0 flex items-center justify-center text-3xl">
-                {{ 1 + index }}
-              </div>
+              <button
+                :class="previewStyles({ active: thumbnails[file].selected, select: isSelectMode })"
+                @click="toggle(thumbnails[file], index, preview)"
+              >
+                <div class="absolute inset-0 flex items-center justify-center text-4xl">
+                  {{ 1 + index }}
+                </div>
 
-              <p class="absolute left-2 right-2 bottom-2 font-mono uppercase text-xs wrap-break-word">
-                {{ thumbnails[file].name.replaceAll('.', ' ') }}
-              </p>
-            </button>
+                <p class="absolute left-2 right-2 bottom-2 font-mono uppercase text-xs wrap-break-word">
+                  {{ thumbnails[file].name.replaceAll('.', ' ') }}
+                </p>
+              </button>
+            </FileOpenFullPreview>
           </template>
 
           <template v-else>
