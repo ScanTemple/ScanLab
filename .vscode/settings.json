@@ -12,6 +12,10 @@
   "files.exclude": {
     "**/node_modules": true,
     "**/bun.lock": true,
+    "**/.nuxt": true,
+    "**/.zed": true,
+    "**/src-tauri/target": true,
+    "**/src-tauri/gen": true,
   },
   "files.associations": {
     "*.css": "tailwindcss"
