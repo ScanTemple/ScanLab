@@ -48,6 +48,21 @@ useEventListener(workspace, 'click', (e) => {
 
 <template>
   <section class="fixed top-0 left-0 right-0 bottom-0">
+    <teleport to="#toolbar">
+      <layout-default-sidebar-block
+        v-for="i of faker.number.int({ min: 12, max: 32 })"
+        :key="i"
+      >
+        <template #header>
+          {{ faker.lorem.words({ min: 1, max: 3 }) }}
+        </template>
+
+        <template #body>
+          {{ faker.lorem.paragraph() }}
+        </template>
+      </layout-default-sidebar-block>
+    </teleport>
+
     <template v-if="scan.data">
       <section
         ref="workspace"

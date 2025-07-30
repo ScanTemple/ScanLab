@@ -61,21 +61,10 @@ const scans = useScansStore()
     </main>
 
     <section class="grid grid-cols-[auto_1fr_auto] grid-rows-[1fr_auto] gap-2 fixed left-2 right-2 bottom-2 top-2 pointer-events-none">
-      <aside class="shadow overflow-hidden bg-zinc-800 w-64 col-start-1 pointer-events-auto">
+      <aside class="shadow overflow-hidden bg-zinc-800/30 col-start-1 pointer-events-auto backdrop-blur-md w-64">
         <section class="h-full py-2">
-          <section class="space-y-2 px-2 overflow-y-auto h-full">
-            <layout-default-sidebar-block
-              v-for="i of faker.number.int({ min: 12, max: 32 })"
-              :key="i"
-            >
-              <template #header>
-                {{ faker.lorem.words({ min: 1, max: 3 }) }}
-              </template>
-
-              <template #body>
-                {{ faker.lorem.paragraph() }}
-              </template>
-            </layout-default-sidebar-block>
+          <section class="space-y-2 px-2 overflow-y-auto overflow-x-hidden h-full">
+            <section id="toolbar" />
           </section>
         </section>
       </aside>
@@ -97,4 +86,6 @@ const scans = useScansStore()
       </footer>
     </section>
   </section>
+
+  <!-- https://youtu.be/ChmVcJK7N-c?list=RDEM9bvfNCNqbQ4iScFk23dYAg -->
 </template>

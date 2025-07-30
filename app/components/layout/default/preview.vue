@@ -24,7 +24,7 @@ const styles = tv({
 <template>
   <button
     type="button"
-    class="p-2 space-y-2 border border-zinc-700 w-full"
+    class="p-2 space-y-2 border-x border-transparent w-full"
     :class="styles({ button: Number(scan.data?.uuid === uuid) })"
     @click="scan.pick(uuid)"
   >
