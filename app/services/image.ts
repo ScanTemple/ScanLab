@@ -16,5 +16,20 @@ export const useImageService = () => {
         lazy: true,
       })
     },
+
+    getPreview: (path: string, stage: UUID, validAt: Date) => {
+      const key = `getPreview:${path}:${stage}:${validAt}`
+
+      return useAsyncData<string>(key, async () => {
+        // TODO: backend should return a base64 encoded string
+        //       temp.ts:37
+        return ''
+      }, {
+        default: () => '',
+        transform: data => `data:image/avif;base64,${data}`,
+
+        lazy: true,
+      })
+    },
   }
 }

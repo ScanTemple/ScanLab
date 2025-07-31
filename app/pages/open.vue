@@ -7,7 +7,6 @@ definePageMeta({
 
 const temp = useTempStore()
 const preview = useImagePreviewStore()
-const files = computed(() => temp.files)
 const thumbnails = computed(() => temp.thumbnails)
 
 const previewStyles = tv({
@@ -28,8 +27,8 @@ const { ctrl, shift, ctrl_a, alt_a, escape } = useMagicKeys({ passive: true })
 function clearSelection() {
   last.value = undefined
 
-  for (const file of files.value) {
-    thumbnails.value[file]!.selected = false
+  for (const file of thumbnails.value) {
+    file.selected = false
   }
 }
 
@@ -52,8 +51,8 @@ watch(() => alt_a?.value, (value) => {
 watch(() => ctrl_a?.value, () => {
   last.value = undefined
 
-  for (const file of files.value) {
-    thumbnails.value[file]!.selected = true
+  for (const file of thumbnails.value) {
+    file.selected = true
   }
 })
 
@@ -77,7 +76,7 @@ function toggle(value: DataThumbnail, index: number) {
       const end = Math.max(last.value, index)
 
       for (let i = start; i <= end; i++) {
-        thumbnails.value[files.value[i]!]!.selected = mode
+        thumbnails.value[i]!.selected = mode
       }
     }
 
@@ -148,27 +147,27 @@ const helpStyles = tv({
 
       <div class="grid grid-cols-[repeat(5,auto)] gap-2 justify-center">
         <div
-          v-for="file, index in files"
-          :key="file"
+          v-for="file, index in thumbnails"
+          :key="file.path"
           class="flex items-center justify-center relative"
         >
-          <template v-if="thumbnails[file] && thumbnails[file].cover">
+          <template v-if="file.cover">
             <img
-              :src="thumbnails[file].cover"
-              :alt="thumbnails[file].name"
+              :src="file.cover"
+              :alt="file.name"
               class="object-cover border rounded border-zinc-700 shadow"
             >
 
             <button
-              :class="previewStyles({ active: thumbnails[file].selected, select: isSelectMode })"
-              @click="toggle(thumbnails[file], index)"
+              :class="previewStyles({ active: file.selected, select: isSelectMode })"
+              @click="toggle(file, index)"
             >
               <div class="absolute inset-0 flex items-center justify-center text-4xl">
                 {{ 1 + index }}
               </div>
 
               <p class="absolute left-2 right-2 bottom-2 font-mono uppercase text-xs wrap-break-word">
-                {{ thumbnails[file].name.replaceAll('.', ' ') }}
+                {{ file.name.replaceAll('.', ' ') }}
               </p>
             </button>
           </template>

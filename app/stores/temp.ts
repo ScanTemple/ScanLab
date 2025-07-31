@@ -1,19 +1,46 @@
-import { invoke } from '@tauri-apps/api/core'
 import { path } from '@tauri-apps/api'
 import { open } from '@tauri-apps/plugin-dialog'
 import { readDir, BaseDirectory } from '@tauri-apps/plugin-fs'
 
 export type DataThumbnail = {
+  path: string
   cover: string
   name: string
   selected: boolean
 }
 
 export const useTempStore = defineStore('temp', () => {
-  const files = ref([] as string[])
-  const thumbnails = ref({} as Record<string, DataThumbnail>)
+  const thumbnails = ref([] as DataThumbnail[])
   const stage = crypto.randomUUID()
   const stageUpdatedAt = new Date()
+
+  const imageService = useImageService()
+
+  function addThumbnails(paths: string[]) {
+    const files = paths.map(e => (reactive({
+      path: e,
+      cover: '',
+      name: '',
+      selected: false,
+    })))
+
+    for (const file of files) {
+      path.basename(file.path).then((e) => {
+        file.name = e
+      })
+    }
+
+    for (const file of files) {
+      imageService.getThumbnail(file.path, 200, stage, stageUpdatedAt).then((thumbnail) => {
+        file.cover = thumbnail.data.value
+      })
+      // imageService.getPreview(file.path, stage, stageUpdatedAt).then((thumbnail) => {
+      //   file.cover = thumbnail.data.value
+      // })
+    }
+
+    return files
+  }
 
   async function selectDirectoryAndListFiles() {
     const selected = await open({
@@ -22,52 +49,18 @@ export const useTempStore = defineStore('temp', () => {
       title: 'Select a directory with images',
     })
 
-    if (typeof selected === 'string') {
-      const entries = await readDir(selected, { baseDir: BaseDirectory.AppLocalData })
-      files.value = await Promise.all(entries
-        .filter(e => e.name && /\.(png|jpe?g|tiff?)$/i.test(e.name))
-      // .map(e => selected + '/' + e.name)
-        .map(e => path.join(selected, e.name)))
+    if (!selected) {
+      return
     }
-  }
-
-  const imageService = useImageService()
-
-  async function dummy() {
-    const selected = 'Q:\\Users\\sawic\\Pictures\\chaos-game-chapter-1.zip\\'
 
     const entries = await readDir(selected, { baseDir: BaseDirectory.AppLocalData })
-    files.value = await Promise.all(entries
-      .filter(e => e.name && /\.(png|jpe?g|tiff?)$/i.test(e.name))
-      // .map(e => selected + '/' + e.name)
-      .map(e => path.join(selected, e.name)))
+    const names = entries.filter(e => /\.(png|jpe?g|tiff?)$/i.test(e.name))
+    const paths = await Promise.all(names.map(e => path.join(selected, e.name)))
+
+    thumbnails.value.push(...addThumbnails(paths))
   }
 
-  dummy()
-
-  watch(files, async (newFiles) => {
-    thumbnails.value = Object.fromEntries(newFiles.map(f => [f, { cover: '', name: '', selected: false } satisfies DataThumbnail]))
-
-    // TODO: cache value on startup
-    // TODO: use this to limit number of thumbnails generated at once
-    const avalaibleCPUs = await invoke('get_cpus') as number
-    console.log(`Available CPU cores: ${avalaibleCPUs}`)
-
-    for (const file of newFiles) {
-      path.basename(file).then((e) => {
-        thumbnails.value[file]!.name = e
-      })
-    }
-
-    for (const file of newFiles) {
-      imageService.getThumbnail(file, 200, stage, stageUpdatedAt).then((thumbnail) => {
-        thumbnails.value[file]!.cover = thumbnail.data.value
-      })
-    }
-  }, { immediate: true })
-
   return {
-    files,
     thumbnails,
     selectDirectoryAndListFiles,
   }
