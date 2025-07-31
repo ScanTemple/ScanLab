@@ -18,6 +18,7 @@ pub fn run() {
         })
         .invoke_handler(tauri::generate_handler![
             add_stage,
+            commands::show_image,
             commands::generate_thumbnail_from_path,
             commands::get_cpus,
         ])

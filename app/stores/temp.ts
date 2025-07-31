@@ -34,8 +34,8 @@ export const useTempStore = defineStore('temp', () => {
       imageService.getThumbnail(file.path, 200, stage, stageUpdatedAt).then((thumbnail) => {
         file.cover = thumbnail.data.value
       })
-      // imageService.getPreview(file.path, stage, stageUpdatedAt).then((thumbnail) => {
-      //   file.cover = thumbnail.data.value
+      // imageService.getPreview(file.path, stage, stageUpdatedAt).then((image) => {
+      //   file.cover = image.data.value
       // })
     }
 

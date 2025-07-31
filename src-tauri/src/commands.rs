@@ -1,9 +1,14 @@
-use crate::utils::thumbnails;
+use crate::utils;
 use tauri::command;
 
 #[command(async)]
 pub fn generate_thumbnail_from_path(source_path: String, size: f32) -> Result<String, String> {
-    thumbnails::generate_thumbnail_from_path(&source_path, size)
+    utils::thumbnails::generate_thumbnail_from_path(&source_path, size)
+}
+
+#[command(async)]
+pub fn show_image(source_path: String) -> Result<String, String> {
+    utils::show_image(&source_path)
 }
 
 #[command(async)]
