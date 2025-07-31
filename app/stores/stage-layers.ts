@@ -1,3 +1,5 @@
+import type { UUID } from 'crypto'
+
 export type DataStageLayerSettings = never
 
 export type DataStageLayer = {

@@ -1,12 +1,6 @@
 <script setup lang="ts">
 // const stages = useStagesStore()
-import { useRoute } from 'vue-router'
-
-const scans = useScansStore()
-
-const hideSidebarsPages = ['/open']
-const route = useRoute()
-const hideSidebars = computed(() => hideSidebarsPages.includes(route.path))
+const temp = useTempStore()
 </script>
 
 <template>
@@ -67,25 +61,22 @@ const hideSidebars = computed(() => hideSidebarsPages.includes(route.path))
     </main>
 
     <section class="grid grid-cols-[auto_1fr_auto] grid-rows-[1fr_auto] gap-2 fixed left-2 right-2 bottom-2 top-2 pointer-events-none">
-      <aside
-        v-if="!hideSidebars"
-        class="shadow overflow-hidden bg-zinc-800/30 col-start-1 pointer-events-auto backdrop-blur-md w-64"
-      >
+      <!-- <aside class="shadow overflow-hidden bg-zinc-800/30 col-start-1 pointer-events-auto backdrop-blur-md w-64">
         <section class="h-full py-2">
           <section class="space-y-2 px-2 overflow-y-auto overflow-x-hidden h-full">
             <section id="toolbar" />
           </section>
         </section>
-      </aside>
+      </aside> -->
+      <div>
+        <!-- stub -->
+      </div>
 
-      <aside
-        v-if="!hideSidebars"
-        class="shadow overflow-hidden bg-zinc-800/30 col-start-3 pointer-events-auto backdrop-blur-md w-48"
-      >
+      <aside class="shadow overflow-hidden bg-zinc-800/30 col-start-3 pointer-events-auto backdrop-blur-md w-48">
         <section class="h-full py-2">
           <section class="space-y-2 px-2 overflow-y-auto overflow-x-hidden h-full">
             <layout-default-preview
-              v-for="scan in scans.data"
+              v-for="scan in temp.thumbnails"
               v-bind="scan"
               :key="scan.uuid"
             />
