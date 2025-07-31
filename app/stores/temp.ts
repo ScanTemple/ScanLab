@@ -12,20 +12,8 @@ export type DataThumbnail = {
 export const useTempStore = defineStore('temp', () => {
   const files = ref([] as string[])
   const thumbnails = ref({} as Record<string, DataThumbnail>)
-
-  async function getThumbnail(filePath: string) {
-    try {
-      const base64 = await invoke('generate_thumbnail_from_path', {
-        sourcePath: filePath,
-        size: 200,
-      })
-      return `data:image/webp;base64,${base64}`
-    }
-    catch (e) {
-      console.error(`Error generating thumbnail ${filePath}: ${e}`)
-      return ''
-    }
-  }
+  const stage = crypto.randomUUID()
+  const stageUpdatedAt = new Date()
 
   async function selectDirectoryAndListFiles() {
     const selected = await open({
@@ -42,6 +30,8 @@ export const useTempStore = defineStore('temp', () => {
         .map(e => path.join(selected, e.name)))
     }
   }
+
+  const imageService = useImageService()
 
   async function dummy() {
     const selected = 'Q:\\Users\\sawic\\Pictures\\chaos-game-chapter-1.zip\\'
@@ -70,8 +60,8 @@ export const useTempStore = defineStore('temp', () => {
     }
 
     for (const file of newFiles) {
-      getThumbnail(file).then((thumbnail) => {
-        thumbnails.value[file]!.cover = thumbnail
+      imageService.getThumbnail(file, 200, stage, stageUpdatedAt).then((thumbnail) => {
+        thumbnails.value[file]!.cover = thumbnail.data.value
       })
     }
   }, { immediate: true })

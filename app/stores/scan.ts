@@ -1,9 +1,9 @@
 export const useScanStore = defineStore('scan', () => {
   const scans = useScansStore()
 
-  const _uuid = ref(undefined as undefined | ReturnType<typeof crypto.randomUUID>)
+  const _uuid = ref(undefined as undefined | UUID)
 
-  function pick(uuid: ReturnType<typeof crypto.randomUUID>) {
+  function pick(uuid: UUID) {
     _uuid.value = uuid
   }
 

@@ -21,6 +21,9 @@ export default defineNuxtConfig({
       from: 'tailwind-variants',
       imports: ['tv'],
     }],
+    dirs: [
+      'services',
+    ],
   },
   devtools: { enabled: true },
   css: ['~/assets/css/main.css'],

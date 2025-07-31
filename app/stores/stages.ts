@@ -4,7 +4,7 @@ export type DataStage = {
   url: string
 
   // TODO: enum for backend
-  uuid: ReturnType<typeof crypto.randomUUID>
+  uuid: UUID
 }
 
 export const useStagesStore = defineStore('stages', () => {

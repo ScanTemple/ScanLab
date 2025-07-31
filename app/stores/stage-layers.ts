@@ -1,7 +1,7 @@
 export type DataStageLayerSettings = never
 
 export type DataStageLayer = {
-  uuid: ReturnType<typeof crypto.randomUUID>
+  uuid: UUID
 
   // metainfo of current stage
   reference: DataStage
@@ -13,7 +13,7 @@ export type DataStageLayer = {
   // todo: stage settings
   data: DataStageLayerSettings
 
-  items: Record<ReturnType<typeof crypto.randomUUID>, {
+  items: Record<UUID, {
     // todo: path, base64, arraybuffer
     preview: string
 

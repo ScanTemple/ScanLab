@@ -1,6 +1,6 @@
 export type DataScan = {
   image: string
-  uuid: ReturnType<typeof crypto.randomUUID>
+  uuid: UUID
   name: string
 }
 
@@ -10,7 +10,7 @@ export const useScansStore = defineStore('scans', () => {
 
   function dummy() {
     data.value.push(...Array.from({ length: 12 }, _ => ({
-      uuid: faker.string.uuid() as ReturnType<typeof crypto.randomUUID>,
+      uuid: faker.string.uuid() as UUID,
       name: faker.system.filePath(),
       image: faker.image.urlPicsumPhotos(faker.datatype.boolean()
         ? {
