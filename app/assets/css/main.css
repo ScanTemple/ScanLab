@@ -9,13 +9,18 @@ button {
   @apply leading-none;
 }
 
-@layer components {
-  .bg-workspace {
+@layer base {
+  body {
     background-image: radial-gradient(circle at 1px 1px, theme(colors.zinc.700) 1px, transparent 0);
-    @apply bg-size-[theme(spacing.6)_theme(spacing.6)]
+    
+    @apply bg-size-[theme(spacing.6)_theme(spacing.6)];
+    
+    @apply bg-neutral-800;
+    @apply text-neutral-300;
   } 
 
   html {
     user-select: none;
   }
 }
+

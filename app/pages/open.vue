@@ -6,6 +6,7 @@ definePageMeta({
 })
 
 const temp = useTempStore()
+const preview = useImagePreviewStore()
 const files = computed(() => temp.files)
 const thumbnails = computed(() => temp.thumbnails)
 
@@ -22,17 +23,10 @@ const previewStyles = tv({
   },
 })
 
-const preview = reactive({
-  state: false,
-  alt: '',
-  src: '',
-})
-
 const { ctrl, shift, ctrl_a, alt_a, escape } = useMagicKeys({ passive: true })
 
 watchArray(() => [alt_a?.value, escape?.value], ([alt_a, by_escape]) => {
-  if (preview.state && by_escape) {
-    preview.state = false
+  if (preview.state) {
     return
   }
 
@@ -81,9 +75,7 @@ function toggle(value: DataThumbnail, index: number) {
   }
 
   else {
-    preview.src = value.cover
-    preview.alt = value.name
-    preview.state = true
+    preview.show(value.cover, value.name)
   }
 }
 
@@ -184,10 +176,5 @@ const helpStyles = tv({
         dummy
       </div>
     </section>
-
-    <FileOpenFullPreview
-      v-bind="preview"
-      @toggle="preview.state = $event"
-    />
   </section>
 </template>

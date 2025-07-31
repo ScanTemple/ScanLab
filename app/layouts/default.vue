@@ -61,8 +61,8 @@ const hideSidebars = computed(() => hideSidebarsPages.includes(route.path))
         </template>
       </layout-default-sidebar-block> -->
 
-  <section class="bg-neutral-800 text-neutral-300 h-dvh grid p-2 gap-2">
-    <main class="overflow-hidden p-2 bg-workspace">
+  <section class="h-dvh grid p-2 gap-2">
+    <main class="overflow-hidden p-2">
       <slot />
     </main>
 
