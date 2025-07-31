@@ -1,8 +1,10 @@
 import { path } from '@tauri-apps/api'
 import { open } from '@tauri-apps/plugin-dialog'
 import { readDir, BaseDirectory } from '@tauri-apps/plugin-fs'
+import type { UUID } from 'crypto'
 
 export type DataThumbnail = {
+  uuid: UUID
   path: string
   cover: string
   name: string
@@ -18,6 +20,7 @@ export const useTempStore = defineStore('temp', () => {
 
   function addThumbnails(paths: string[]) {
     const files = paths.map(e => (reactive({
+      uuid: crypto.randomUUID(),
       path: e,
       cover: '',
       name: '',

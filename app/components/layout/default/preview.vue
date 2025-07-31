@@ -1,13 +1,9 @@
 <script setup lang="ts">
-import { path } from '@tauri-apps/api'
-
-const props = defineProps<{
-  uuid: DataScan['uuid']
-  image: DataScan['image']
-  name: DataScan['name']
+defineProps<{
+  uuid: DataThumbnail['uuid']
+  cover: DataThumbnail['cover']
+  name: DataThumbnail['name']
 }>()
-
-const normalized = await path.basename(props.name)
 
 const scan = useScanStore()
 
@@ -29,12 +25,12 @@ const styles = tv({
     @click="scan.pick(uuid)"
   >
     <img
-      :src="image"
+      :src="cover"
       class="w-full"
     >
 
     <p class="truncate uppercase font-mono text-xs px-2">
-      {{ normalized.replaceAll(/_|-/g, ' ') }}
+      {{ name.replaceAll(/_|-/g, ' ') }}
     </p>
   </button>
 </template>
