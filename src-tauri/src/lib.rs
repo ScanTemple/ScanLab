@@ -21,6 +21,7 @@ pub fn run() {
             commands::show_image,
             commands::generate_thumbnail_from_path,
             commands::get_cpus,
+            commands::generate_random_name,
         ])
         .plugin(tauri_plugin_fs::init())
         .plugin(tauri_plugin_dialog::init())

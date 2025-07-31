@@ -17,3 +17,10 @@ pub fn get_cpus() -> usize {
         .map(|p| p.get())
         .unwrap_or(1)
 }
+
+#[command(async)]
+pub fn generate_random_name() -> String {
+    names::Generator::default()
+        .next()
+        .unwrap_or_else(|| "default-name".to_string())
+}
