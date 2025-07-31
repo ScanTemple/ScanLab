@@ -106,10 +106,10 @@ const helpStyles = tv({
   base: '',
   variants: {
     button: {
-      LMB: 'text-sky-300',
-      CTRL: 'text-amber-300',
-      SHIFT: 'text-lime-300',
-      ESC: 'text-red-300',
+      LMB: 'text-sky-300/50',
+      CTRL: 'text-amber-300/50',
+      SHIFT: 'text-lime-300/50',
+      ESC: 'text-red-300/50',
     },
   },
 })
@@ -122,7 +122,7 @@ const helpStyles = tv({
     </button>
 
     <section class="grid grid-cols-[1fr_auto_1fr] gap-2 items-start">
-      <div class="grid grid-cols-[auto_auto_1fr] sticky top-2 gap-2 opacity-30">
+      <div class="grid grid-cols-[auto_auto_1fr] sticky top-4 gap-2 text-shadow-md">
         <template
           v-for="{ keys, label }, index in help"
           :key="index"
@@ -137,12 +137,12 @@ const helpStyles = tv({
             </file-open-help-button>
           </div>
 
-          <div class="col-start-3">
+          <div class="col-start-3 text-neutral-300/50">
             {{ label }}
           </div>
         </template>
 
-        <div class="w-[1px] bg-zinc-700 col-start-2 row-start-1 row-span-4" />
+        <div class="w-[1px] bg-zinc-700/50 col-start-2 row-start-1 row-span-4" />
       </div>
 
       <div class="grid grid-cols-[repeat(5,auto)] gap-2 justify-center">
