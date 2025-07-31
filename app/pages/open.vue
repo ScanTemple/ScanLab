@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { useMagicKeys, watchArray } from '@vueuse/core'
+import { useMagicKeys } from '@vueuse/core'
 
 definePageMeta({
   layout: 'open',
@@ -25,17 +25,27 @@ const previewStyles = tv({
 
 const { ctrl, shift, ctrl_a, alt_a, escape } = useMagicKeys({ passive: true })
 
-watchArray(() => [alt_a?.value, escape?.value], ([alt_a, by_escape]) => {
+function clearSelection() {
+  last.value = undefined
+
+  for (const file of files.value) {
+    thumbnails.value[file]!.selected = false
+  }
+}
+
+watch(() => escape?.value, (value) => {
   if (preview.state) {
     return
   }
 
-  if (alt_a || by_escape) {
-    last.value = undefined
+  if (value) {
+    clearSelection()
+  }
+})
 
-    for (const file of files.value) {
-      thumbnails.value[file]!.selected = false
-    }
+watch(() => alt_a?.value, (value) => {
+  if (value) {
+    clearSelection()
   }
 })
 
