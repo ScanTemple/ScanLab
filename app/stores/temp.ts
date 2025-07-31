@@ -55,9 +55,13 @@ export const useTempStore = defineStore('temp', () => {
 
   dummy()
 
-  // TODO: Fix UI thread blocking issue
   watch(files, async (newFiles) => {
     thumbnails.value = Object.fromEntries(newFiles.map(f => [f, { cover: '', name: '', selected: false } satisfies DataThumbnail]))
+
+    // TODO: cache value on startup
+    // TODO: use this to limit number of thumbnails generated at once
+    const avalaibleCPUs = await invoke('get_cpus') as number
+    console.log(`Available CPU cores: ${avalaibleCPUs}`)
 
     for (const file of newFiles) {
       path.basename(file).then((e) => {
