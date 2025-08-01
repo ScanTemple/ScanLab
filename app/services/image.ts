@@ -11,7 +11,6 @@ export const useImageService = () => {
         size,
       }), {
         default: () => '',
-        transform: data => `data:image/webp;base64,${data}`,
 
         lazy: true,
       })
