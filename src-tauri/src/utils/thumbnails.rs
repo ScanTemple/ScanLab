@@ -1,7 +1,6 @@
 use base64::{engine::general_purpose, Engine as _};
 use fast_image_resize::images::Image;
 use fast_image_resize::{FilterType, IntoImageView, ResizeAlg, ResizeOptions, Resizer};
-use image::codecs::png::PngEncoder;
 use image::{DynamicImage, GenericImageView, ImageEncoder, ImageReader};
 use std::collections::hash_map::DefaultHasher;
 use std::fs;
@@ -30,7 +29,7 @@ pub fn generate_thumbnail_from_path(
 
     // Generate cache key based on file path, size, and modification time
     let cache_key = generate_cache_key(source_path, size)?;
-    let cache_path = cache_dir.join(format!("{}.png", cache_key));
+    let cache_path = cache_dir.join(format!("{}.avif", cache_key));
 
     // Check if cached thumbnail exists
     if cache_path.exists() {
@@ -66,7 +65,7 @@ pub fn generate_thumbnail_from_path(
 
     println!("Thumb generated and cached in {:?}", thumbstart.elapsed());
 
-    Ok(format!("data:image/png;base64,{}", b64))
+    Ok(format!("data:image/avif;base64,{}", b64))
 }
 
 // fn generate_thumbnail_from_stage(stage: &ProcessingStage) -> Result<String, String> {}
@@ -91,7 +90,15 @@ pub fn resize(img: &DynamicImage, to: f32) -> BufWriter<Vec<u8>> {
         .unwrap();
 
     let mut result_buf = BufWriter::new(Vec::new());
-    PngEncoder::new(&mut result_buf)
+    // PngEncoder::new(&mut result_buf)
+    //     .write_image(dst_image.buffer(), new_w, new_h, img.color().into())
+    //     .unwrap();
+
+    // image::codecs::webp::WebPEncoder::new_lossless(&mut result_buf)
+    //     .encode(dst_image.buffer(), new_w, new_h, img.color().into())
+    //     .unwrap();
+
+    image::codecs::avif::AvifEncoder::new_with_speed_quality(&mut result_buf, 10, 50)
         .write_image(dst_image.buffer(), new_w, new_h, img.color().into())
         .unwrap();
 
