@@ -1,6 +1,6 @@
 use pipeline::{ProcessingPipeline, ProcessingStage};
 use std::sync::{Arc, Mutex};
-use tauri::{command, Builder, State};
+use tauri::{command, Builder, State, Manager};
 
 mod commands;
 mod pipeline;
@@ -12,6 +12,11 @@ pub struct AppState {
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
+    // config join bundle identifier
+    let config_dir = dirs::config_dir()
+        .expect("missing config dir")
+        .join("ScanLab");
+
     Builder::default()
         .manage(AppState {
             pipeline: Arc::new(Mutex::new(ProcessingPipeline { steps: vec![] })),
@@ -25,7 +30,7 @@ pub fn run() {
         ])
         .plugin(tauri_plugin_fs::init())
         .plugin(tauri_plugin_dialog::init())
-        .setup(|app| {
+        .setup(move |app| {
             if cfg!(debug_assertions) {
                 app.handle().plugin(
                     tauri_plugin_log::Builder::default()
@@ -33,6 +38,12 @@ pub fn run() {
                         .build(),
                 )?;
             }
+
+            let app_handle = app.handle();
+            
+            std::fs::create_dir_all(&app_handle.path().app_cache_dir().expect("missing app cache dir")).expect("failed to create cache dir");
+            std::fs::create_dir_all(&config_dir).expect("failed to create config dir");
+            
             Ok(())
         })
         .run(tauri::generate_context!())

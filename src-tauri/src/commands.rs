@@ -2,8 +2,8 @@ use crate::utils;
 use tauri::command;
 
 #[command(async)]
-pub fn generate_thumbnail_from_path(source_path: String, size: f32) -> Result<String, String> {
-    utils::thumbnails::generate_thumbnail_from_path(&source_path, size)
+pub fn generate_thumbnail_from_path(app_handle: tauri::AppHandle, source_path: String, size: f32) -> Result<String, String> {
+    utils::thumbnails::generate_thumbnail_from_path(&source_path, size, &app_handle)
 }
 
 #[command(async)]

@@ -3,12 +3,48 @@ use fast_image_resize::images::Image;
 use fast_image_resize::{FilterType, IntoImageView, ResizeAlg, ResizeOptions, Resizer};
 use image::codecs::png::PngEncoder;
 use image::{DynamicImage, GenericImageView, ImageEncoder, ImageReader};
+use std::collections::hash_map::DefaultHasher;
+use std::fs;
+use std::hash::{Hash, Hasher};
 use std::io::BufWriter;
+use std::path::Path;
 use std::time::Instant;
+use tauri::Manager;
 
 // generate thumbnail from source path
-pub fn generate_thumbnail_from_path(source_path: &str, size: f32) -> Result<String, String> {
+pub fn generate_thumbnail_from_path(
+    source_path: &str,
+    size: f32,
+    app_handle: &tauri::AppHandle,
+) -> Result<String, String> {
     let start = Instant::now();
+
+    let cache_dir = app_handle
+        .path()
+        .app_cache_dir()
+        .map_err(|e| format!("Failed to get cache directory: {}", e))?
+        .join("thumbnails");
+
+    fs::create_dir_all(&cache_dir)
+        .map_err(|e| format!("Failed to create cache directory: {}", e))?;
+
+    // Generate cache key based on file path, size, and modification time
+    let cache_key = generate_cache_key(source_path, size)?;
+    let cache_path = cache_dir.join(format!("{}.png", cache_key));
+
+    // Check if cached thumbnail exists
+    if cache_path.exists() {
+        match fs::read(&cache_path) {
+            Ok(cached_data) => {
+                let b64 = general_purpose::STANDARD.encode(&cached_data);
+                println!("Thumbnail loaded from cache in {:?}", start.elapsed());
+                return Ok(format!("data:image/png;base64,{}", b64));
+            }
+            Err(e) => {
+                println!("Failed to read cached thumbnail: {}, regenerating", e);
+            }
+        }
+    }
 
     let img = ImageReader::open(source_path)
         .map_err(|e| format!("Failed to open image: {}", e))?
@@ -19,9 +55,16 @@ pub fn generate_thumbnail_from_path(source_path: &str, size: f32) -> Result<Stri
     let thumbstart = Instant::now();
 
     let resized_buf = resize(&img, size);
-    let b64 = general_purpose::STANDARD.encode(resized_buf.into_inner().unwrap());
+    let thumbnail_data = resized_buf.into_inner().unwrap();
 
-    println!("Thumb generated in {:?}", thumbstart.elapsed());
+    // Save thumbnail to cache
+    if let Err(e) = fs::write(&cache_path, &thumbnail_data) {
+        println!("Failed to save thumbnail to cache: {}", e);
+    }
+
+    let b64 = general_purpose::STANDARD.encode(&thumbnail_data);
+
+    println!("Thumb generated and cached in {:?}", thumbstart.elapsed());
 
     Ok(format!("data:image/png;base64,{}", b64))
 }
@@ -37,6 +80,12 @@ pub fn resize(img: &DynamicImage, to: f32) -> BufWriter<Vec<u8>> {
 
     let resize_options = ResizeOptions::new().resize_alg(ResizeAlg::Convolution(FilterType::Box));
     let mut resizer = Resizer::new();
+
+    #[cfg(target_arch = "x86_64")]
+    unsafe {
+        resizer.set_cpu_extensions(fast_image_resize::CpuExtensions::Sse4_1);
+    }
+
     resizer
         .resize(img, &mut dst_image, &resize_options)
         .unwrap();
@@ -47,4 +96,26 @@ pub fn resize(img: &DynamicImage, to: f32) -> BufWriter<Vec<u8>> {
         .unwrap();
 
     result_buf
+}
+
+fn generate_cache_key(source_path: &str, size: f32) -> Result<String, String> {
+    let path = Path::new(source_path);
+
+    // Get file modification time
+    let metadata = fs::metadata(path).map_err(|e| format!("Failed to get file metadata: {}", e))?;
+    let modified = metadata
+        .modified()
+        .map_err(|e| format!("Failed to get modification time: {}", e))?;
+
+    // Create hash from path, size, and modification time
+    let mut hasher = DefaultHasher::new();
+    source_path.hash(&mut hasher);
+    size.to_bits().hash(&mut hasher);
+    modified
+        .duration_since(std::time::UNIX_EPOCH)
+        .map_err(|e| format!("Invalid modification time: {}", e))?
+        .as_secs()
+        .hash(&mut hasher);
+
+    Ok(hasher.finish().to_string())
 }
