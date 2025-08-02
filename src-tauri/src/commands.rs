@@ -1,8 +1,61 @@
+use crate::app::project::{ProcessingStage, Project};
 use crate::utils;
-use tauri::command;
+use std::path::PathBuf;
+use std::sync::{Arc, Mutex};
+use tauri::{command, State};
+
+pub struct AppState {
+    pub project: Arc<Mutex<Project>>,
+}
 
 #[command(async)]
-pub fn generate_thumbnail_from_path(app_handle: tauri::AppHandle, source_path: String, size: f32) -> Result<String, String> {
+pub fn add_stage(state: State<'_, AppState>, stage: ProcessingStage) {
+    let mut project = state.project.lock().unwrap();
+    project.pipeline.steps.push(stage);
+}
+
+// create project
+#[command(async)]
+pub fn create_project(state: State<'_, AppState>, name: String, dir: String) -> Result<(), String> {
+    let mut project = state.project.lock().unwrap();
+    *project = Project::new();
+    project.file_path = Some(PathBuf::from(dir).join(format!("{}.ScanLab", name)));
+
+    project
+        .save()
+        .map_err(|e| format!("Failed to create project: {}", e))?;
+
+    println!("Project created at {:?}", project.file_path);
+
+    Ok(())
+}
+
+// load project
+#[command(async)]
+pub fn load_project(state: State<'_, AppState>, path: String) -> Result<(), String> {
+    let mut project = state.project.lock().unwrap();
+    *project = Project::load_from_file(PathBuf::from(path))
+        .map_err(|e| format!("Failed to load project: {}", e))?;
+
+    println!("Project loaded from {:?}", project.file_path);
+
+    Ok(())
+}
+
+// save project
+#[command(async)]
+pub fn save_project(state: State<'_, AppState>) -> Result<(), String> {
+    let mut project = state.project.lock().unwrap();
+    project.save().unwrap();
+    Ok(())
+}
+
+#[command(async)]
+pub fn generate_thumbnail_from_path(
+    app_handle: tauri::AppHandle,
+    source_path: String,
+    size: f32,
+) -> Result<String, String> {
     utils::thumbnails::generate_thumbnail_from_path(&source_path, size, &app_handle)
 }
 

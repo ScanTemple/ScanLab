@@ -1,7 +1,9 @@
 <script setup lang="ts">
 import { invoke } from '@tauri-apps/api/core'
+import { open } from '@tauri-apps/plugin-dialog'
 
 const newProjectName = ref('')
+const newProjectDirectory = ref('' as string)
 
 // Generate 5 fake recent projects
 const recentProjects = ref<string[]>(Array.from({ length: 5 }, () => faker.commerce.productName()))
@@ -12,17 +14,35 @@ const generateProjectName = async () => {
 
 const showCreateModal = ref(false)
 
-const createProject = () => {
-  // TODO: Implement actual project creation logic
-  showCreateModal.value = false
-  newProjectName.value = ''
+async function createProject() {
+  await invoke('create_project', {
+    name: newProjectName.value,
+    dir: newProjectDirectory.value,
+  }).then(() => {
+    showCreateModal.value = false
+  }).catch((error) => {
+    console.error('Error creating project:', error)
+  })
 }
 
-const openProject = async () => {
-  // const selected = await open({ directory: true })
-  // if (selected) {
-  //   // TODO: Implement logic to open the selected project
-  // }
+const loadProject = async () => {
+  const selectedFile = await open({ multiple: false })
+  if (selectedFile) {
+    await invoke('load_project', { path: selectedFile })
+    .then(() => {
+      console.log('Project loaded successfully')
+    })
+    .catch((error) => {
+      console.error('Error opening project:', error)
+    })
+  }
+}
+
+async function selectSaveFolder() { 
+  const selected = await open({ directory: true })
+  if (selected) {
+    newProjectDirectory.value = selected
+  }
 }
 
 onMounted(() => {
@@ -47,7 +67,7 @@ onMounted(() => {
 
     <button
       class="w-64 py-4 text-xl font-semibold cursor-pointer rounded-lg shadow"
-      @click="openProject"
+      @click="loadProject"
     >
       Open Existing Project
     </button>
@@ -93,6 +113,12 @@ onMounted(() => {
             class="cursor-pointer text-gray-500 hover:text-gray-700 transition"
             @click="generateProjectName"
           />
+          <button class="" @click="selectSaveFolder">
+            Select folder
+          </button>
+          <div>
+            Folder: {{ newProjectDirectory }}
+          </div>
           <button
             class="bg-blue-600 text-white px-6 py-2 rounded"
             :disabled="!newProjectName.trim()"
