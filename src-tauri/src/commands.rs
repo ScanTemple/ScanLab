@@ -19,11 +19,11 @@ pub fn add_stage(state: State<'_, AppState>, stage: ProcessingStage) {
 pub fn create_project(state: State<'_, AppState>, name: String, dir: String) -> Result<(), String> {
     let mut project = state.project.lock().unwrap();
     *project = Project::new();
-    project.file_path = Some(PathBuf::from(dir).join(format!("{}.ScanLab", name)));
+    project.file_path = Some(PathBuf::from(dir).join(format!("{name}.ScanLab")));
 
     project
         .save()
-        .map_err(|e| format!("Failed to create project: {}", e))?;
+        .map_err(|e| format!("Failed to create project: {e}"))?;
 
     println!("Project created at {:?}", project.file_path);
 
@@ -35,7 +35,7 @@ pub fn create_project(state: State<'_, AppState>, name: String, dir: String) -> 
 pub fn load_project(state: State<'_, AppState>, path: String) -> Result<(), String> {
     let mut project = state.project.lock().unwrap();
     *project = Project::load_from_file(PathBuf::from(path))
-        .map_err(|e| format!("Failed to load project: {}", e))?;
+        .map_err(|e| format!("Failed to load project: {e}"))?;
 
     println!("Project loaded from {:?}", project.file_path);
 

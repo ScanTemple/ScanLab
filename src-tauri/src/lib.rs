@@ -1,4 +1,5 @@
 use app::project::Project;
+use std::env;
 use std::sync::{Arc, Mutex};
 use tauri::{Builder, Manager};
 
@@ -13,6 +14,25 @@ pub fn run() {
     let config_dir = dirs::config_dir()
         .expect("missing config dir")
         .join("ScanLab");
+
+    // https://github.com/tauri-apps/tauri/issues/9394
+    #[cfg(target_os = "linux")]
+    {
+        let dri_exists = std::path::Path::new("/dev/dri").exists();
+        let wayland_display = env::var("WAYLAND_DISPLAY").is_ok();
+        let xdg_type = env::var("XDG_SESSION_TYPE").unwrap_or_default();
+
+        // println!(
+        //     "DRI exists: {dri_exists}, Wayland display variable: {wayland_display}, XDG session type: {xdg_type}",
+        // );
+
+        // Disable dmabuf renderer for wayland sessions
+        // This is a workaround for issues with dmabuf renderer in some environments
+        if wayland_display && dri_exists && (xdg_type == "wayland" || xdg_type == "x11") {
+            env::set_var("WEBKIT_DISABLE_DMABUF_RENDERER", "1");
+            println!("Disabled dmabuf renderer for Wayland/X11 session");
+        }
+    }
 
     Builder::default()
         .manage(commands::AppState {
@@ -42,7 +62,7 @@ pub fn run() {
             let app_handle = app.handle();
 
             std::fs::create_dir_all(
-                &app_handle
+                app_handle
                     .path()
                     .app_cache_dir()
                     .expect("missing app cache dir"),

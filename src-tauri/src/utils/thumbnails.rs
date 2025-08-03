@@ -21,15 +21,15 @@ pub fn generate_thumbnail_from_path(
     let cache_dir = app_handle
         .path()
         .app_cache_dir()
-        .map_err(|e| format!("Failed to get cache directory: {}", e))?
+        .map_err(|e| format!("Failed to get cache directory: {e}"))?
         .join("thumbnails");
 
     fs::create_dir_all(&cache_dir)
-        .map_err(|e| format!("Failed to create cache directory: {}", e))?;
+        .map_err(|e| format!("Failed to create cache directory: {e}"))?;
 
     // Generate cache key based on file path, size, and modification time
     let cache_key = generate_cache_key(source_path, size)?;
-    let cache_path = cache_dir.join(format!("{}.avif", cache_key));
+    let cache_path = cache_dir.join(format!("{cache_key}.avif"));
 
     // Check if cached thumbnail exists
     if cache_path.exists() {
@@ -37,18 +37,18 @@ pub fn generate_thumbnail_from_path(
             Ok(cached_data) => {
                 let b64 = general_purpose::STANDARD.encode(&cached_data);
                 println!("Thumbnail loaded from cache in {:?}", start.elapsed());
-                return Ok(format!("data:image/png;base64,{}", b64));
+                return Ok(format!("data:image/png;base64,{b64}"));
             }
             Err(e) => {
-                println!("Failed to read cached thumbnail: {}, regenerating", e);
+                println!("Failed to read cached thumbnail: {e}, regenerating");
             }
         }
     }
 
     let img = ImageReader::open(source_path)
-        .map_err(|e| format!("Failed to open image: {}", e))?
+        .map_err(|e| format!("Failed to open image: {e}"))?
         .decode()
-        .map_err(|e| format!("Failed to decode image: {}", e))?;
+        .map_err(|e| format!("Failed to decode image: {e}"))?;
 
     println!("Image decoded in {:?}", start.elapsed());
     let thumbstart = Instant::now();
@@ -58,14 +58,14 @@ pub fn generate_thumbnail_from_path(
 
     // Save thumbnail to cache
     if let Err(e) = fs::write(&cache_path, &thumbnail_data) {
-        println!("Failed to save thumbnail to cache: {}", e);
+        println!("Failed to save thumbnail to cache: {e}");
     }
 
     let b64 = general_purpose::STANDARD.encode(&thumbnail_data);
 
     println!("Thumb generated and cached in {:?}", thumbstart.elapsed());
 
-    Ok(format!("data:image/avif;base64,{}", b64))
+    Ok(format!("data:image/avif;base64,{b64}"))
 }
 
 // fn generate_thumbnail_from_stage(stage: &ProcessingStage) -> Result<String, String> {}
@@ -109,10 +109,10 @@ fn generate_cache_key(source_path: &str, size: f32) -> Result<String, String> {
     let path = Path::new(source_path);
 
     // Get file modification time
-    let metadata = fs::metadata(path).map_err(|e| format!("Failed to get file metadata: {}", e))?;
+    let metadata = fs::metadata(path).map_err(|e| format!("Failed to get file metadata: {e}"))?;
     let modified = metadata
         .modified()
-        .map_err(|e| format!("Failed to get modification time: {}", e))?;
+        .map_err(|e| format!("Failed to get modification time: {e}"))?;
 
     // Create hash from path, size, and modification time
     let mut hasher = DefaultHasher::new();
@@ -120,7 +120,7 @@ fn generate_cache_key(source_path: &str, size: f32) -> Result<String, String> {
     size.to_bits().hash(&mut hasher);
     modified
         .duration_since(std::time::UNIX_EPOCH)
-        .map_err(|e| format!("Invalid modification time: {}", e))?
+        .map_err(|e| format!("Invalid modification time: {e}"))?
         .as_secs()
         .hash(&mut hasher);
 

@@ -1,5 +1,4 @@
 use base64::{engine::general_purpose, Engine as _};
-use infer;
 use std::fs::File;
 use std::io::Read;
 
@@ -19,5 +18,5 @@ pub fn show_image(source_path: &str) -> Result<String, String> {
 
     let encoded = general_purpose::STANDARD.encode(&buffer);
 
-    return Ok(format!("data:{};base64,{}", mime_type, encoded));
+    Ok(format!("data:{mime_type};base64,{encoded}"))
 }
