@@ -49,6 +49,7 @@ pub fn run() {
             commands::get_cpus,
             commands::generate_random_name,
             commands::create_project,
+            commands::create_temp_project,
             commands::load_project,
             commands::save_project,
         ])
@@ -80,6 +81,14 @@ pub fn run() {
                     .expect("missing app cache dir"),
             )
             .expect("failed to create cache dir");
+
+            std::fs::create_dir_all(
+                app_handle
+                    .path()
+                    .app_data_dir()
+                    .expect("missing app data dir"),
+            )
+            .expect("failed to create data dir");
             std::fs::create_dir_all(&config_dir).expect("failed to create config dir");
 
             Ok(())

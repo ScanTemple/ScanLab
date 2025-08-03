@@ -25,7 +25,7 @@ async function createProject() {
   })
 }
 
-const loadProject = async () => {
+async function loadProject() {
   const selectedFile = await open({ multiple: false })
   if (selectedFile) {
     await invoke('load_project', { path: selectedFile })
@@ -36,6 +36,16 @@ const loadProject = async () => {
       console.error('Error opening project:', error)
     })
   }
+}
+
+async function createTempProject() {
+  await invoke('create_temp_project')
+    .then(() => {
+      console.log('Temporary project created successfully')
+    })
+    .catch((error) => {
+      console.error('Error creating temporary project:', error)
+    })
 }
 
 async function selectSaveFolder() { 

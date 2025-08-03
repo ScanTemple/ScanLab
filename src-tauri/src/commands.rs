@@ -2,7 +2,7 @@ use crate::app::project::{ProcessingStage, Project};
 use crate::utils;
 use std::path::PathBuf;
 use std::sync::{Arc, Mutex};
-use tauri::{command, State};
+use tauri::{command, Manager, State};
 
 pub struct AppState {
     pub project: Arc<Mutex<Project>>,
@@ -26,6 +26,23 @@ pub fn create_project(state: State<'_, AppState>, name: String, dir: String) -> 
         .map_err(|e| format!("Failed to create project: {e}"))?;
 
     info!("Project created at {:?}", project.file_path);
+
+    Ok(())
+}
+
+#[command(async)]
+pub fn create_temp_project(
+    state: State<'_, AppState>,
+    app_handle: tauri::AppHandle,
+) -> Result<(), String> {
+    let app_data_dir = app_handle
+        .path()
+        .app_data_dir()
+        .expect("missing app data dir");
+
+    let mut project = state.project.lock().unwrap();
+    *project = Project::new();
+    project.file_path = Some(app_data_dir.join("temp_project.ScanLab"));
 
     Ok(())
 }
