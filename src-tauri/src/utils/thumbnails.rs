@@ -24,8 +24,7 @@ pub fn generate_thumbnail_from_path(
         .map_err(|e| format!("Failed to get cache directory: {e}"))?
         .join("thumbnails");
 
-    fs::create_dir_all(&cache_dir)
-        .map_err(|e| format!("Failed to create cache directory: {e}"))?;
+    fs::create_dir_all(&cache_dir).map_err(|e| format!("Failed to create cache directory: {e}"))?;
 
     // Generate cache key based on file path, size, and modification time
     let cache_key = generate_cache_key(source_path, size)?;
@@ -36,11 +35,11 @@ pub fn generate_thumbnail_from_path(
         match fs::read(&cache_path) {
             Ok(cached_data) => {
                 let b64 = general_purpose::STANDARD.encode(&cached_data);
-                println!("Thumbnail loaded from cache in {:?}", start.elapsed());
+                info!("Thumbnail loaded from cache in {:?}", start.elapsed());
                 return Ok(format!("data:image/png;base64,{b64}"));
             }
             Err(e) => {
-                println!("Failed to read cached thumbnail: {e}, regenerating");
+                info!("Failed to read cached thumbnail: {e}, regenerating");
             }
         }
     }
@@ -50,7 +49,7 @@ pub fn generate_thumbnail_from_path(
         .decode()
         .map_err(|e| format!("Failed to decode image: {e}"))?;
 
-    println!("Image decoded in {:?}", start.elapsed());
+    info!("Image decoded in {:?}", start.elapsed());
     let thumbstart = Instant::now();
 
     let resized_buf = resize(&img, size);
@@ -58,12 +57,12 @@ pub fn generate_thumbnail_from_path(
 
     // Save thumbnail to cache
     if let Err(e) = fs::write(&cache_path, &thumbnail_data) {
-        println!("Failed to save thumbnail to cache: {e}");
+        info!("Failed to save thumbnail to cache: {e}");
     }
 
     let b64 = general_purpose::STANDARD.encode(&thumbnail_data);
 
-    println!("Thumb generated and cached in {:?}", thumbstart.elapsed());
+    info!("Thumb generated and cached in {:?}", thumbstart.elapsed());
 
     Ok(format!("data:image/avif;base64,{b64}"))
 }

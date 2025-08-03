@@ -1,3 +1,6 @@
+#[macro_use]
+extern crate log;
+
 use app::project::Project;
 use std::env;
 use std::sync::{Arc, Mutex};
@@ -16,13 +19,14 @@ pub fn run() {
         .join("ScanLab");
 
     // https://github.com/tauri-apps/tauri/issues/9394
+    // TODO: check for GPU
     #[cfg(target_os = "linux")]
     {
         let dri_exists = std::path::Path::new("/dev/dri").exists();
         let wayland_display = env::var("WAYLAND_DISPLAY").is_ok();
         let xdg_type = env::var("XDG_SESSION_TYPE").unwrap_or_default();
 
-        // println!(
+        // info!(
         //     "DRI exists: {dri_exists}, Wayland display variable: {wayland_display}, XDG session type: {xdg_type}",
         // );
 
@@ -30,7 +34,7 @@ pub fn run() {
         // This is a workaround for issues with dmabuf renderer in some environments
         if wayland_display && dri_exists && (xdg_type == "wayland" || xdg_type == "x11") {
             env::set_var("WEBKIT_DISABLE_DMABUF_RENDERER", "1");
-            println!("Disabled dmabuf renderer for Wayland/X11 session");
+            warn!("Disabled dmabuf renderer for Wayland/X11 session");
         }
     }
 
@@ -54,7 +58,15 @@ pub fn run() {
             if cfg!(debug_assertions) {
                 app.handle().plugin(
                     tauri_plugin_log::Builder::default()
-                        .level(log::LevelFilter::Info)
+                        .level(log::LevelFilter::Debug)
+                        .format(|out, message, record| {
+                            out.finish(format_args!(
+                                "[{} {}] {}",
+                                record.level(),
+                                record.target(),
+                                message
+                            ))
+                        })
                         .build(),
                 )?;
             }

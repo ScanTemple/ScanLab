@@ -25,7 +25,7 @@ pub fn create_project(state: State<'_, AppState>, name: String, dir: String) -> 
         .save()
         .map_err(|e| format!("Failed to create project: {e}"))?;
 
-    println!("Project created at {:?}", project.file_path);
+    info!("Project created at {:?}", project.file_path);
 
     Ok(())
 }
@@ -37,7 +37,7 @@ pub fn load_project(state: State<'_, AppState>, path: String) -> Result<(), Stri
     *project = Project::load_from_file(PathBuf::from(path))
         .map_err(|e| format!("Failed to load project: {e}"))?;
 
-    println!("Project loaded from {:?}", project.file_path);
+    info!("Project loaded from {:?}", project.file_path);
 
     Ok(())
 }
