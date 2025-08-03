@@ -6,6 +6,7 @@
     "build": "nuxt build",
     "dev": "nuxt dev",
     "t:dev": "tauri dev",
+    "w:dev": "WEBKIT_DISABLE_DMABUF_RENDERER=1 tauri dev",
     "generate": "nuxt generate",
     "preview": "nuxt preview",
     "postinstall": "nuxt prepare"

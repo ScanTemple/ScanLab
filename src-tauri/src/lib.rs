@@ -20,23 +20,23 @@ pub fn run() {
 
     // https://github.com/tauri-apps/tauri/issues/9394
     // TODO: check for GPU
-    #[cfg(target_os = "linux")]
-    {
-        let dri_exists = std::path::Path::new("/dev/dri").exists();
-        let wayland_display = env::var("WAYLAND_DISPLAY").is_ok();
-        let xdg_type = env::var("XDG_SESSION_TYPE").unwrap_or_default();
+    // #[cfg(target_os = "linux")]
+    // {
+    //     let dri_exists = std::path::Path::new("/dev/dri").exists();
+    //     let wayland_display = env::var("WAYLAND_DISPLAY").is_ok();
+    //     let xdg_type = env::var("XDG_SESSION_TYPE").unwrap_or_default();
 
-        // info!(
-        //     "DRI exists: {dri_exists}, Wayland display variable: {wayland_display}, XDG session type: {xdg_type}",
-        // );
+    //     // info!(
+    //     //     "DRI exists: {dri_exists}, Wayland display variable: {wayland_display}, XDG session type: {xdg_type}",
+    //     // );
 
-        // Disable dmabuf renderer for wayland sessions
-        // This is a workaround for issues with dmabuf renderer in some environments
-        if wayland_display && dri_exists && (xdg_type == "wayland" || xdg_type == "x11") {
-            env::set_var("WEBKIT_DISABLE_DMABUF_RENDERER", "1");
-            warn!("Disabled dmabuf renderer for Wayland/X11 session");
-        }
-    }
+    //     // Disable dmabuf renderer for wayland sessions
+    //     // This is a workaround for issues with dmabuf renderer in some environments
+    //     if wayland_display && dri_exists && (xdg_type == "wayland" || xdg_type == "x11") {
+    //         env::set_var("WEBKIT_DISABLE_DMABUF_RENDERER", "1");
+    //         warn!("Disabled dmabuf renderer for Wayland/X11 session");
+    //     }
+    // }
 
     Builder::default()
         .manage(commands::AppState {
