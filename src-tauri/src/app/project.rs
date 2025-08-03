@@ -6,9 +6,25 @@ use std::{fs, path::PathBuf};
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Project {
     pub pipeline: ProcessingPipeline,
+    pub files: Vec<ImageDirectory>,
+
+    pub last_seen_stage: u32,
+    pub last_seen_image: u32,
 
     #[serde(skip)]
     pub file_path: Option<PathBuf>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct ImageDirectory {
+    pub path: String,
+    pub images: Vec<ImageFile>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct ImageFile {
+    pub path: String,
+    pub size: (u32, u32),
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -27,7 +43,10 @@ impl Project {
     pub fn new() -> Self {
         Self {
             pipeline: ProcessingPipeline { steps: vec![] },
+            files: vec![],
             file_path: None,
+            last_seen_stage: 0,
+            last_seen_image: 0,
         }
     }
 
@@ -58,13 +77,5 @@ impl Project {
 
     pub fn save(&mut self) -> Result<()> {
         self.save_to_file(None)
-    }
-
-    pub fn get_file_path(&self) -> Option<&PathBuf> {
-        self.file_path.as_ref()
-    }
-
-    pub fn set_file_path(&mut self, path: PathBuf) {
-        self.file_path = Some(path)
     }
 }

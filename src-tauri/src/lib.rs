@@ -1,4 +1,4 @@
-use app::project::{ProcessingPipeline, Project};
+use app::project::Project;
 use std::sync::{Arc, Mutex};
 use tauri::{Builder, Manager};
 
@@ -16,10 +16,7 @@ pub fn run() {
 
     Builder::default()
         .manage(commands::AppState {
-            project: Arc::new(Mutex::new(Project {
-                pipeline: ProcessingPipeline { steps: vec![] },
-                file_path: None,
-            })),
+            project: Arc::new(Mutex::new(Project::new())),
         })
         .invoke_handler(tauri::generate_handler![
             commands::add_stage,
