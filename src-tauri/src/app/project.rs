@@ -68,4 +68,8 @@ impl Project {
     pub fn save(&mut self) -> Result<()> {
         self.save_to_file(None)
     }
+
+    // pub fn add_stage(&mut self, stage: ProcessingStage) {
+    //     self.stages.push(stage);
+    // }
 }

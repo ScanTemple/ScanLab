@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { invoke } from '@tauri-apps/api/core'
 import { open } from '@tauri-apps/plugin-dialog'
+import type { RotateParams } from '@/../src-tauri/bindings/RotateParams'
+import type { ProcessingStage } from '@/../src-tauri/bindings/ProcessingStage'
 
 const newProjectName = ref('')
 const newProjectDirectory = ref('' as string)
@@ -35,6 +37,20 @@ async function loadProject() {
     .catch((error) => {
       console.error('Error opening project:', error)
     })
+
+    await invoke('add_stage', { stage: 'rotate' });
+
+    await invoke('list_stages')
+    .then((result) => {
+      const stages = result as ProcessingStage[]
+      console.log('Available stages:', stages)
+    })
+
+    await invoke('get_stage', { index: 1 })
+    .then((result) => {
+      const stage = result as ProcessingStage
+      console.log('Stage at index 1:', stage)
+    })
   }
 }
 
@@ -56,7 +72,7 @@ async function selectSaveFolder() {
 }
 
 onMounted(() => {
-  generateProjectName()
+  console.log({ angle: 0 } as RotateParams)
 })
 </script>
 
@@ -64,7 +80,7 @@ onMounted(() => {
   <section class="flex flex-col items-center justify-center h-screen">
     <button
       class="w-64 py-4 mb-8 text-xl font-semibold cursor-pointer rounded-lg shadow"
-      @click="showCreateModal = true"
+      @click="showCreateModal = true; generateProjectName()"
     >
       Create New Project
     </button>

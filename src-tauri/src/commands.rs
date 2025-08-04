@@ -10,9 +10,28 @@ pub struct AppState {
 }
 
 #[command(async)]
-pub fn add_stage(state: State<'_, AppState>, stage: ProcessingStage) {
+pub fn add_stage(state: State<'_, AppState>, stage: String) -> Result<(), String> {
     let mut project = state.project.lock().unwrap();
-    project.stages.push(stage);
+    project
+        .stages
+        .push(ProcessingStage::new_stage(&stage).map_err(|e| format!("Failed to add stage: {e}"))?);
+    Ok(())
+}
+
+#[command(async)]
+pub fn get_stage(state: State<'_, AppState>, index: usize) -> Result<ProcessingStage, String> {
+    let project = state.project.lock().unwrap();
+    project
+        .stages
+        .get(index)
+        .cloned()
+        .ok_or_else(|| format!("No stage found at index {index}"))
+}
+
+#[command(async)]
+pub fn list_stages(state: State<'_, AppState>) -> Result<Vec<ProcessingStage>, String> {
+    let project = state.project.lock().unwrap();
+    Ok(project.stages.clone())
 }
 
 // create project
@@ -21,6 +40,9 @@ pub fn create_project(state: State<'_, AppState>, name: String, dir: String) -> 
     let mut project = state.project.lock().unwrap();
     *project = Project::new();
     project.file_path = Some(PathBuf::from(dir).join(format!("{name}.ScanLab")));
+    project
+        .stages
+        .push(ProcessingStage::new_stage("open").unwrap());
 
     project
         .save()
