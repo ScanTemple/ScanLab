@@ -8,7 +8,7 @@ use tauri::{Builder, Manager};
 
 mod app;
 mod commands;
-mod pipeline;
+pub mod stages;
 mod utils;
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]

@@ -1,4 +1,5 @@
-use crate::app::project::{ProcessingStage, Project};
+use crate::app::project::Project;
+use crate::stages::ProcessingStage;
 use crate::utils;
 use std::path::PathBuf;
 use std::sync::{Arc, Mutex};
@@ -11,7 +12,7 @@ pub struct AppState {
 #[command(async)]
 pub fn add_stage(state: State<'_, AppState>, stage: ProcessingStage) {
     let mut project = state.project.lock().unwrap();
-    project.pipeline.steps.push(stage);
+    project.stages.push(stage);
 }
 
 // create project

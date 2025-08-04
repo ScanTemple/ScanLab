@@ -1,12 +1,12 @@
-use crate::pipeline::{open, rotate, save};
+use crate::stages::ProcessingStage;
 use anyhow::{Context, Result};
 use serde::{Deserialize, Serialize};
 use std::{fs, path::PathBuf};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Project {
-    pub pipeline: ProcessingPipeline,
     pub files: Vec<ImageDirectory>,
+    pub stages: Vec<ProcessingStage>,
 
     pub last_seen_stage: u32,
     pub last_seen_image: u32,
@@ -27,26 +27,16 @@ pub struct ImageFile {
     pub size: (u32, u32),
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct ProcessingPipeline {
-    pub steps: Vec<ProcessingStage>,
-}
-
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub enum ProcessingStage {
-    Open(open::OpenParams),
-    Rotate(rotate::RotateParams),
-    Save(save::SaveParams),
-}
-
 impl Project {
     pub fn new() -> Self {
         Self {
-            pipeline: ProcessingPipeline { steps: vec![] },
             files: vec![],
-            file_path: None,
+            stages: vec![],
+
             last_seen_stage: 0,
             last_seen_image: 0,
+
+            file_path: None,
         }
     }
 
