@@ -30,6 +30,8 @@ const applyPoint = [
 ]
 
 const applyPointRef = ref(0)
+
+const isGlobal = computed(() => applyToRef.value && applyPointRef.value)
 </script>
 
 <template>
@@ -40,8 +42,16 @@ const applyPointRef = ref(0)
       </p>
 
       <section :class="styles.block()">
-        <header class="font-mono uppercase text-end pb-2 text-xs">
-          actions
+        <header class="font-mono uppercase text-end pb-2 text-xs inline-flex items-center gap-2 justify-between">
+          <span
+            v-show="isGlobal"
+            class="text-amber-300 inline-flex items-center gap-[1ch] px-2"
+          >
+            <icon name="ic:baseline-warning-amber" />
+            <span>will be applied globally</span>
+          </span>
+
+          <span>actions</span>
         </header>
 
         <ui-button
