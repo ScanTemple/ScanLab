@@ -56,23 +56,20 @@ const temp = useTempStore()
       </layout-default-sidebar-block> -->
 
   <section class="h-dvh grid p-2 gap-2">
-    <main class="overflow-hidden p-2">
-      <slot />
-    </main>
-
-    <section class="grid grid-cols-[auto_1fr_auto] grid-rows-[1fr_auto] gap-2 fixed left-2 right-2 bottom-2 top-2 pointer-events-none">
-      <!-- <aside class="shadow overflow-hidden bg-zinc-800/30 col-start-1 pointer-events-auto backdrop-blur-[2px] w-64">
+    <section class="grid grid-cols-[auto_1fr_auto] grid-rows-[1fr_auto] gap-2 fixed inset-2">
+      <!-- <aside class="shadow overflow-hidden bg-zinc-800/30 col-start-1 backdrop-blur-[2px] w-64">
         <section class="h-full py-2">
           <section class="space-y-2 px-2 overflow-y-auto overflow-x-hidden h-full">
             <section id="toolbar" />
           </section>
         </section>
       </aside> -->
-      <div>
-        <!-- stub -->
-      </div>
 
-      <aside class="shadow overflow-hidden border border-zinc-700 col-start-3 pointer-events-auto backdrop-blur-[2px] w-48">
+      <main class="overflow-hidden p-2 fixed inset-0">
+        <slot />
+      </main>
+
+      <aside class="shadow overflow-hidden border border-zinc-700 col-start-3 backdrop-blur-[2px] w-48">
         <section class="h-full py-2">
           <section class="space-y-2 px-2 overflow-y-auto overflow-x-hidden h-full">
             <layout-default-preview
@@ -84,7 +81,7 @@ const temp = useTempStore()
         </section>
       </aside>
 
-      <footer class="p-2 flex justify-center col-span-full border border-zinc-700 shadow leading-none row-start-2 pointer-events-auto backdrop-blur-[2px]">
+      <footer class="p-2 flex justify-center col-span-full border border-zinc-700 shadow leading-none row-start-2 backdrop-blur-[2px]">
         <fileprocess-stage />
       </footer>
     </section>
