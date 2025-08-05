@@ -54,6 +54,8 @@ pub fn run() {
             commands::create_temp_project,
             commands::load_project,
             commands::save_project,
+            commands::drop_images,
+            commands::open_images,
         ])
         .plugin(tauri_plugin_fs::init())
         .plugin(tauri_plugin_dialog::init())
