@@ -10,7 +10,7 @@ const stageLayers = useStageLayersStore()
     >
       <fileprocess-stage-item
         class="inline-block"
-        :reference="layer.reference"
+        v-bind="layer"
       />
 
       <icon

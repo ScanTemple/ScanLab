@@ -62,5 +62,11 @@ export const useStageLayersStore = defineStore('stage-layers', () => {
     ] satisfies ReadonlyArray<DataStageLayer> as ReadonlyArray<DataStageLayer>
   })
 
-  return { defined, user }
+  const route = useRoute()
+  const active = computed(() => defined.value.find(e => {
+    console.log(route.query, '/', e.uuid)
+    return e.uuid === route.query.uuid
+  }))
+
+  return { active, defined, user }
 })

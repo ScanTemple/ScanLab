@@ -1,48 +1,13 @@
 <script setup lang="ts">
-import type { UUID } from 'crypto'
+const state = useState(crypto.randomUUID(), () => faker.number.float({ min: 0, max: 360 }))
 
-type DataRotateLayerBase = {
-  uuid: UUID
-  value: number
+function addDegrees(degrees: number) {
+  state.value = (state.value + degrees) % 360
 }
 
-type DataRotateLayerGlobal = DataRotateLayerBase & {
-  type: 'global'
-  rules: unknown[]
+function subtractDegrees(degrees: number) {
+  state.value = (state.value - degrees) % 360
 }
-
-type DataRotateLayerLocal = DataRotateLayerBase & {
-  type: 'local'
-}
-
-type DataRotateLayer = DataRotateLayerGlobal | DataRotateLayerLocal
-
-const shaderd = [{
-  uuid: crypto.randomUUID(),
-  value: faker.number.int({ min: 0, max: 360 }),
-  type: 'global',
-  rules: [],
-}, {
-  uuid: crypto.randomUUID(),
-  value: faker.number.int({ min: 0, max: 360 }),
-  type: 'global',
-  rules: [],
-}] satisfies DataRotateLayer[] as DataRotateLayer[]
-
-const local = [{
-  uuid: crypto.randomUUID(),
-  value: faker.number.int({ min: 0, max: 360 }),
-  type: 'local',
-}, {
-  uuid: crypto.randomUUID(),
-  value: faker.number.int({ min: 0, max: 360 }),
-  type: 'local',
-}] satisfies DataRotateLayer[] as DataRotateLayer[]
-
-const _active = ref(undefined as undefined | UUID)
-
-const layers = computed(() => [...shaderd, ...local])
-const active = computed(() => layers.value.find(e => e.uuid === _active.value))
 
 const styles = {
   layer: {
@@ -57,7 +22,7 @@ const styles = {
     }),
 
     value: tv({
-      base: 'transition-colors text-end',
+      base: 'transition-colors text-end text-shadow-md font-mono text-sm',
       variants: {
         active: {
           true: 'text-lime-300',
@@ -104,79 +69,128 @@ const styles = {
       variants: {
         disabled: {
           true: 'pointer-events-none text-zinc-300/10',
-          false: 'cursor-pointer text-neutral-300/50 hover:text-neutral-300',
+          false: 'cursor-pointer text-neutral-300/50 hover:text-neutral-300 hover:bg-zinc-700',
+        },
+        warning: {
+          true: 'border-l-2 border-red-500',
         },
       },
       defaultVariants: {
         disabled: false,
+        warning: false,
       },
     }),
   },
+
+  block: tv({
+    base: 'p-2  shadow-md leading-none backdrop-blur-[2px] border border-zinc-700',
+  }),
 }
+
+const applyTo = [
+  '—',
+  'Each',
+  'Every second',
+]
+
+const applyToRef = ref(0)
+
+const applyPoint = [
+  '—',
+  'First',
+  'Current',
+]
+
+const applyPointRef = ref(0)
 </script>
 
 <template>
   <section>
-    <aside class="space-y-16">
-      <section class="w-fit grid grid-cols-[auto_1fr] items-center">
-        <template
-          v-for="layer of layers"
-          :key="layer.uuid"
-        >
-          <span
-            :class="styles.layer.value({ active: layer.uuid === _active })"
-            class="text-shadow-md"
-          >
-            {{ layer.value }}°
-          </span>
+    <aside class="space-y-4 w-fit">
+      <p class="text-lime-300/50 px-6">
+        {{ state.toFixed(2) }}
+      </p>
 
-          <button
-            :class="styles.layer.button({ active: layer.uuid === _active })"
-            @click="_active = layer.uuid"
-          >
-            <icon
-              v-if="layer.uuid === _active"
-              name="ic:outline-layers"
-            />
-            <icon
-              v-else
-              name="ic:baseline-layers"
-            />
-
-            <span :class="styles.layer.type({ type: layer.type, active: layer.uuid === _active })">
-              {{ layer.type }}
-            </span>
-
-            <span>layer</span>
-          </button>
-        </template>
+      <section :class="styles.block()">
+        <header class="font-mono uppercase text-end pb-2 text-xs">
+          actions
+        </header>
 
         <button
           type="button"
-          :class="styles.action.button()"
-          class="col-start-2 mt-2"
+          :class="styles.action.button({ })"
+          @click="addDegrees(90)"
         >
-          <icon name="ic:baseline-add" />
-          <span>add layer</span>
+          <icon name="ic:baseline-rotate-left" />
+          <span>90° right</span>
         </button>
 
-        <section class="col-start-2 pt-16">
-          <button
-            type="button"
-            :class="styles.action.button({ disabled: !active })"
-          >
-            <icon name="ic:baseline-rotate-left" />
-            <span>90° right</span>
-          </button>
+        <button
+          type="button"
+          :class="styles.action.button({ })"
+          @click="subtractDegrees(90)"
+        >
+          <icon name="ic:baseline-rotate-right" />
+          <span>90° left</span>
+        </button>
+      </section>
 
-          <button
-            type="button"
-            :class="styles.action.button({ disabled: !active })"
-          >
-            <icon name="ic:baseline-rotate-right" />
-            <span>90° left</span>
-          </button>
-        </section>
+      <section :class="styles.block()">
+        <header class="font-mono uppercase text-end pb-2 text-xs">
+          globals
+        </header>
+
+        <ui-dropdown>
+          <template #header>
+            <span>
+              Apply to
+            </span>
+
+            <span
+              v-if="applyToRef !== 0"
+              class="text-amber-300/50"
+            >
+              {{ applyTo[applyToRef] }}
+            </span>
+          </template>
+
+          <template #body>
+            <ui-dropdown-item
+              v-for="item, index in applyTo"
+              :key="index"
+              :disabled="index === applyToRef"
+              @click="applyToRef = index"
+            >
+              {{ item }}
+            </ui-dropdown-item>
+          </template>
+        </ui-dropdown>
+
+        <ui-dropdown :disabled="applyToRef === 0">
+          <template #header>
+            <span>
+              Start from
+            </span>
+
+            <span
+              v-if="applyPointRef !== 0"
+              class="text-amber-300/50"
+            >
+              {{ applyPoint[applyPointRef] }}
+            </span>
+          </template>
+
+          <template #body>
+            <ui-dropdown-item
+              v-for="item, index in applyPoint"
+              :key="index"
+              :disabled="index === applyPointRef"
+              @click="applyPointRef = index"
+            >
+              {{ item }}
+            </ui-dropdown-item>
+          </template>
+        </ui-dropdown>
       </section>
     </aside>
     <!-- q(≧▽≦q) -->
