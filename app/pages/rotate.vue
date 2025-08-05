@@ -15,23 +15,27 @@ const styles = {
   }),
 }
 
-const applyTo = [
-  '—',
-  'Each',
-  'Every second',
-]
+const apply = reactive({
+  to: {
+    ref: ref(0),
+    list: [
+      '—',
+      'Each',
+      'Every second',
+    ],
+  },
 
-const applyToRef = ref(0)
+  point: {
+    ref: ref(0),
+    list: [
+      '—',
+      'First',
+      'Current',
+    ],
+  },
+})
 
-const applyPoint = [
-  '—',
-  'First',
-  'Current',
-]
-
-const applyPointRef = ref(0)
-
-const isGlobal = computed(() => applyToRef.value && applyPointRef.value)
+const isGlobal = computed(() => apply.to.ref && apply.point.ref)
 </script>
 
 <template>
@@ -42,7 +46,13 @@ const isGlobal = computed(() => applyToRef.value && applyPointRef.value)
       </p>
 
       <section :class="styles.block()">
-        <header class="font-mono uppercase text-end pb-2 text-xs inline-flex items-center gap-2 justify-between">
+        <header
+          class="font-mono uppercase text-end pb-2 text-xs"
+          :class="{
+            'inline-flex items-center gap-2 justify-between pr-2': isGlobal,
+            'px-2': !isGlobal,
+          }"
+        >
           <span
             v-show="isGlobal"
             class="text-amber-300 inline-flex items-center gap-[1ch] px-2"
@@ -72,7 +82,7 @@ const isGlobal = computed(() => applyToRef.value && applyPointRef.value)
       </section>
 
       <section :class="styles.block()">
-        <header class="font-mono uppercase text-end pb-2 text-xs">
+        <header class="font-mono uppercase text-end pb-2 text-xs px-2">
           globals
         </header>
 
@@ -83,45 +93,45 @@ const isGlobal = computed(() => applyToRef.value && applyPointRef.value)
             </span>
 
             <span
-              v-if="applyToRef !== 0"
+              v-if="apply.to.ref !== 0"
               class="text-amber-300/50"
             >
-              {{ applyTo[applyToRef] }}
+              {{ apply.to.list[apply.to.ref] }}
             </span>
           </template>
 
           <template #body>
             <ui-dropdown-item
-              v-for="item, index in applyTo"
+              v-for="item, index in apply.to.list"
               :key="index"
-              :disabled="index === applyToRef"
-              @click="applyToRef = index"
+              :disabled="index === apply.to.ref"
+              @click="apply.to.ref = index"
             >
               {{ item }}
             </ui-dropdown-item>
           </template>
         </ui-dropdown>
 
-        <ui-dropdown :disabled="applyToRef === 0">
+        <ui-dropdown :disabled="apply.to.ref === 0">
           <template #header>
             <span>
               Start from
             </span>
 
             <span
-              v-if="applyPointRef !== 0"
+              v-if="apply.point.ref !== 0"
               class="text-amber-300/50"
             >
-              {{ applyPoint[applyPointRef] }}
+              {{ apply.point.list[apply.point.ref] }}
             </span>
           </template>
 
           <template #body>
             <ui-dropdown-item
-              v-for="item, index in applyPoint"
+              v-for="item, index in apply.point.list"
               :key="index"
-              :disabled="index === applyPointRef"
-              @click="applyPointRef = index"
+              :disabled="index === apply.point.ref"
+              @click="apply.point.ref = index"
             >
               {{ item }}
             </ui-dropdown-item>
