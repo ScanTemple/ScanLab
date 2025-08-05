@@ -10,78 +10,6 @@ function subtractDegrees(degrees: number) {
 }
 
 const styles = {
-  layer: {
-    button: tv({
-      base: 'leading-none gap-[1ch] items-center transition py-2 px-4 w-full group/button grid grid-cols-[auto_1fr_auto] text-end hover:translate-x-2 text-shadow-md',
-      variants: {
-        active: {
-          true: 'pointer-events-none text-neutral-300 border-b-zinc-300',
-          false: 'cursor-pointer hover:bg-zinc-700s text-neutral-300/50 hover:text-neutral-300',
-        },
-      },
-    }),
-
-    value: tv({
-      base: 'transition-colors text-end text-shadow-md font-mono text-sm',
-      variants: {
-        active: {
-          true: 'text-lime-300',
-          false: 'text-lime-300/50 group-hover/button:text-lime-300',
-        },
-      },
-    }),
-
-    type: tv({
-      base: 'transition-colors',
-      variants: {
-        type: {
-          global: '',
-          local: '',
-        },
-        active: {
-          true: '',
-          false: '',
-        },
-      },
-      compoundVariants: [{
-        active: true,
-        type: 'global',
-        class: 'text-amber-300',
-      }, {
-        active: true,
-        type: 'local',
-        class: 'text-sky-300',
-      }, {
-        active: false,
-        type: 'global',
-        class: 'text-amber-300/50 group-hover/button:text-amber-300',
-      }, {
-        active: false,
-        type: 'local',
-        class: 'text-sky-300/50 group-hover/button:text-sky-300',
-      }],
-    }),
-  },
-
-  action: {
-    button: tv({
-      base: 'leading-none gap-[1ch] transition-colors py-2 px-4 flex items-center w-full text-shadow-md',
-      variants: {
-        disabled: {
-          true: 'pointer-events-none text-zinc-300/10',
-          false: 'cursor-pointer text-neutral-300/50 hover:text-neutral-300 hover:bg-zinc-700',
-        },
-        warning: {
-          true: 'border-l-2 border-red-500',
-        },
-      },
-      defaultVariants: {
-        disabled: false,
-        warning: false,
-      },
-    }),
-  },
-
   block: tv({
     base: 'p-2  shadow-md leading-none backdrop-blur-[2px] border border-zinc-700',
   }),
@@ -116,23 +44,21 @@ const applyPointRef = ref(0)
           actions
         </header>
 
-        <button
+        <ui-button
           type="button"
-          :class="styles.action.button({ })"
           @click="addDegrees(90)"
         >
           <icon name="ic:baseline-rotate-left" />
           <span>90° right</span>
-        </button>
+        </ui-button>
 
-        <button
+        <ui-button
           type="button"
-          :class="styles.action.button({ })"
           @click="subtractDegrees(90)"
         >
           <icon name="ic:baseline-rotate-right" />
           <span>90° left</span>
-        </button>
+        </ui-button>
       </section>
 
       <section :class="styles.block()">
