@@ -63,7 +63,7 @@ export const useStageLayersStore = defineStore('stage-layers', () => {
   })
 
   const route = useRoute()
-  const active = computed(() => defined.value.find(e => {
+  const active = computed(() => defined.value.find((e) => {
     console.log(route.query, '/', e.uuid)
     return e.uuid === route.query.uuid
   }))
