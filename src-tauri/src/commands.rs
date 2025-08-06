@@ -67,6 +67,18 @@ pub fn create_temp_project(
     Ok(())
 }
 
+// load project by path
+#[command(async)]
+pub fn load_recent_project(state: State<'_, AppState>, project_path: String) -> Result<(), String> {
+    let mut project = state.project.lock().unwrap();
+    *project = Project::load_from_file(PathBuf::from(project_path))
+        .map_err(|e| format!("Failed to load project: {e}"))?;
+
+    info!("Project loaded from {:?}", project.file_path);
+
+    Ok(())
+}
+
 // load project
 #[command(async)]
 pub fn load_project(

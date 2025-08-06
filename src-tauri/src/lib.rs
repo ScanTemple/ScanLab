@@ -57,6 +57,7 @@ pub fn run() {
             commands::drop_images,
             commands::open_images,
             commands::select_directory,
+            commands::load_recent_project,
         ])
         .plugin(tauri_plugin_fs::init())
         .plugin(tauri_plugin_dialog::init())
