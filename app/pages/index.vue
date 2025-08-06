@@ -80,7 +80,7 @@ onMounted(() => {
 
 <template>
   <section class="grid grid-cols-2 size-full gap-2">
-    <div class="flex flex-col items-center justify-center gap-2">
+    <div class="flex flex-col items-center justify-center gap-2 group relative">
       <ui-button
         class="text-xl"
         @click="showCreateModal = true; generateProjectName()"
@@ -89,7 +89,7 @@ onMounted(() => {
         <span>Create New Project</span>
       </ui-button>
 
-      <div class="flex items-center w-full group gap-2">
+      <div class="flex items-center w-full gap-2">
         <div class="flex-grow h-px bg-zinc-700 group-hover:bg-zinc-600 transition-colors" />
         <span class="text-zinc-700 group-hover:text-zinc-600 transition-colors">OR</span>
         <div class="flex-grow h-px bg-zinc-700 group-hover:bg-zinc-600 transition-colors" />
@@ -102,6 +102,11 @@ onMounted(() => {
         <icon name="ic:baseline-folder-open" />
         <span>Open Existing Project</span>
       </ui-button>
+
+      <div class="absolute bottom-0 left-0 text-neutral-300/50 inline-flex items-center gap-[1ch] text-shadow-md">
+        <icon name="ic:baseline-move-to-inbox" />
+        <span>You can also just drag n drop files into this window without project creation.</span>
+      </div>
     </div>
 
     <aside class="p-2 backdrop-blur-[2px] border border-zinc-700 hover:border-zinc-600 transition-colors shadow-md">
