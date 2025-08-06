@@ -116,6 +116,11 @@ export const useCommands = () => {
     return result || 'default-name'
   }
 
+  const selectDirectory = async (): Promise<string | null> => {
+    const result = await executeCommand<string>('select_directory')
+    return result || null
+  }
+
   return {
     // State
     isLoading: readonly(isLoading),
@@ -141,6 +146,7 @@ export const useCommands = () => {
     // showImage,
     getCpus,
     generateRandomName,
+    selectDirectory,
 
     // Helper methods
     clearError: () => { error.value = null },

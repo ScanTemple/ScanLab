@@ -201,6 +201,20 @@ pub fn open_images(
     Ok(())
 }
 
+#[command(async)]
+pub fn select_directory(app_handle: tauri::AppHandle) -> Result<String, String> {
+    let dir = app_handle
+        .dialog()
+        .file()
+        .set_title("Select Directory")
+        .blocking_pick_folder();
+
+    match dir {
+        Some(dir) => Ok(dir.to_string()),
+        None => Err("No directory selected".to_string()),
+    }
+}
+
 // #[command(async)]
 // pub fn open_images(
 //     state: State<'_, AppState>,

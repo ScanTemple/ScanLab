@@ -10,7 +10,7 @@ mod save;
 mod split;
 
 #[derive(Default, Debug, Clone, Serialize, Deserialize, TS)]
-#[ts(export)]
+#[ts(export, export_to = "index.ts")]
 pub struct StageData<T> {
     pub images: Vec<ImageInfo<T>>,
     pub images_lookup: HashMap<Uuid, usize>,
@@ -28,7 +28,7 @@ impl<T> StageData<T> {
 }
 
 #[derive(Default, Debug, Clone, Serialize, Deserialize, TS)]
-#[ts(export)]
+#[ts(export, export_to = "index.ts")]
 pub struct ImageInfo<T> {
     pub id: Uuid,
     pub parent_id: Option<Uuid>,
@@ -37,7 +37,7 @@ pub struct ImageInfo<T> {
 }
 
 #[derive(Default, Debug, Clone, Serialize, Deserialize, TS)]
-#[ts(export)]
+#[ts(export, export_to = "index.ts")]
 pub enum ImageMode {
     #[default]
     Auto,
@@ -51,7 +51,7 @@ pub trait GenericStage {
 
 #[derive(Debug, Clone, Serialize, Deserialize, TS)]
 #[serde(tag = "type", rename_all = "camelCase")]
-#[ts(export)]
+#[ts(export, export_to = "index.ts")]
 pub enum ProcessingStage {
     Open(open::OpenStage),
     Rotate(rotate::RotateStage),
