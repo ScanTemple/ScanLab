@@ -4,10 +4,3 @@
 fn main() {
     app_lib::run();
 }
-
-#[cfg(debug_assertions)]
-pub fn export_types() {
-    use ts_rs::TS;
-
-    app_lib::stages::ProcessingStage::export().unwrap();
-}

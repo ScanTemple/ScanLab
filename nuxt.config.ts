@@ -20,9 +20,14 @@ export default defineNuxtConfig({
     }, {
       from: 'tailwind-variants',
       imports: ['tv'],
+    }, {
+      from: '~/types',
+      imports: ['*'],
+      type: true,
     }],
     dirs: [
       'services',
+      'types',
     ],
   },
   devtools: { enabled: true },

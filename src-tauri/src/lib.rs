@@ -56,11 +56,13 @@ pub fn run() {
             commands::save_project,
             commands::drop_images,
             commands::open_images,
+            commands::select_directory,
         ])
         .plugin(tauri_plugin_fs::init())
         .plugin(tauri_plugin_dialog::init())
         .setup(move |app| {
-            if cfg!(debug_assertions) {
+            #[cfg(debug_assertions)]
+            {
                 app.handle().plugin(
                     tauri_plugin_log::Builder::default()
                         .level(log::LevelFilter::Debug)
