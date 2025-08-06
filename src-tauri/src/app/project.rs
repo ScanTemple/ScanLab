@@ -40,6 +40,28 @@ impl Project {
         }
     }
 
+    pub fn new_empty_and_save(path: PathBuf) -> Result<Self> {
+        let mut new_prj = Self {
+            files: vec![],
+            stages: vec![],
+
+            last_seen_stage: 0,
+            last_seen_image: 0,
+
+            file_path: None,
+        };
+
+        new_prj.file_path = Some(path);
+
+        new_prj
+            .stages
+            .push(ProcessingStage::new_stage("open").unwrap());
+
+        new_prj.save()?;
+
+        Ok(new_prj)
+    }
+
     pub fn save_to_file(&mut self, path: Option<PathBuf>) -> Result<()> {
         let file_path = match path {
             Some(p) => {

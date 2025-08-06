@@ -39,14 +39,7 @@ pub fn list_stages(state: State<'_, AppState>) -> Result<Vec<ProcessingStage>, S
 #[command(async)]
 pub fn create_project(state: State<'_, AppState>, name: String, dir: String) -> Result<(), String> {
     let mut project = state.project.lock().unwrap();
-    *project = Project::new();
-    project.file_path = Some(PathBuf::from(dir).join(format!("{name}.ScanLab")));
-    project
-        .stages
-        .push(ProcessingStage::new_stage("open").unwrap());
-
-    project
-        .save()
+    *project = Project::new_empty_and_save(PathBuf::from(dir).join(format!("{name}.ScanLab")))
         .map_err(|e| format!("Failed to create project: {e}"))?;
 
     info!("Project created at {:?}", project.file_path);
@@ -64,19 +57,39 @@ pub fn create_temp_project(
         .app_data_dir()
         .expect("missing app data dir");
 
+    let file_path = app_data_dir.join("temp_project.ScanLab");
     let mut project = state.project.lock().unwrap();
-    *project = Project::new();
-    project.file_path = Some(app_data_dir.join("temp_project.ScanLab"));
+    *project = Project::new_empty_and_save(file_path)
+        .map_err(|e| format!("Failed to create temporary project: {e}"))?;
+
+    info!("Temporary project created at {:?}", project.file_path);
 
     Ok(())
 }
 
 // load project
 #[command(async)]
-pub fn load_project(state: State<'_, AppState>, path: String) -> Result<(), String> {
+pub fn load_project(
+    state: State<'_, AppState>,
+    app_handle: tauri::AppHandle,
+) -> Result<(), String> {
+    let file = app_handle
+        .dialog()
+        .file()
+        .add_filter("ScanLab project", &["ScanLab"])
+        .set_title("Select ScanLab project")
+        .blocking_pick_file();
+
+    let file = match file {
+        Some(file) => match file.into_path() {
+            Ok(path) => path,
+            Err(_) => return Err("Invalid path selected".to_string()),
+        },
+        None => return Err("No file selected".to_string()),
+    };
+
     let mut project = state.project.lock().unwrap();
-    *project = Project::load_from_file(PathBuf::from(path))
-        .map_err(|e| format!("Failed to load project: {e}"))?;
+    *project = Project::load_from_file(file).map_err(|e| format!("Failed to load project: {e}"))?;
 
     info!("Project loaded from {:?}", project.file_path);
 
