@@ -1,7 +1,46 @@
-import type { ProcessingStage } from '~~/src-tauri/bindings/ProcessingStage'
+import type { UUID } from 'crypto'
+
+export type DataStage2 = {
+  icon: string
+  label: string
+  url: string
+}
+
+export type DataStage3 = {
+  uuid: UUID
+} & DataStage2 & ProcessingStage
+
+const types = {
+  open: {
+    icon: 'ic:outline-file-open',
+    label: 'Open',
+    url: '/open',
+  },
+} as Record<string, DataStage2>
+
+// [{
+//   icon: 'ic:baseline-image',
+//   label: 'Pick',
+//   url: '/',
+// }, {
+//   icon: 'ic:outline-file-open',
+//   label: 'Open',
+//   url: '/open',
+// }, {
+//   icon: 'ic:baseline-crop',
+//   label: 'Crop',
+//   url: '/crop',
+// }, {
+//   icon: 'ic:baseline-rotate-90-degrees-ccw',
+//   label: 'Rotate',
+//   url: '/rotate',
+// }, {
+//   icon: 'ic:baseline-save',
+//   label: 'Save',
+//   url: '/save',
+// }]
 
 export const useProjectStore = defineStore('project', () => {
-  const projectStages = ref([] as ProcessingStage[])
   const stagesArchive = readonly([{
     category: '',
     stages: [
@@ -25,9 +64,19 @@ export const useProjectStore = defineStore('project', () => {
     ],
   }])
 
+  const _projectStages = ref([] as ProcessingStage[])
+
+  const projectStages = computed(() => {
+    return _projectStages.value.map(e => ({
+      uuid: crypto.randomUUID(),
+      ...types[e.type] || {},
+      ...e,
+    } as DataStage3))
+  })
+
   async function refreshStages() {
-    projectStages.value = await useCommands().listStages()
-    console.log('Stages refreshed:', projectStages.value)
+    _projectStages.value = await useCommands().listStages()
+    console.log('Stages refreshed:', _projectStages.value)
   }
 
   return { stagesArchive, projectStages, refreshStages }

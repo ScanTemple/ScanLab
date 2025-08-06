@@ -1,11 +1,12 @@
 <script setup lang="ts">
-const stageLayers = useStageLayersStore()
+// const stageLayers = useStageLayersStore()
+const project = useProjectStore()
 </script>
 
 <template>
   <ul class="space-x-2 border border-zinc-700 shadow leading-none row-start-2 backdrop-blur-[2px] p-2 flex justify-center items-center">
     <template
-      v-for="layer in stageLayers.defined"
+      v-for="layer in project.projectStages"
       :key="layer.uuid"
     >
       <fileprocess-stage-item
