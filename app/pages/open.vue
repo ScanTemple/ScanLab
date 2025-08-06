@@ -117,10 +117,6 @@ const helpStyles = tv({
 
 <template>
   <section>
-    <button @click="temp.selectDirectoryAndListFiles">
-      Select Directory
-    </button>
-
     <section class="grid grid-cols-[1fr_auto_1fr] gap-2 items-start">
       <div class="grid grid-cols-[auto_auto_1fr] sticky top-4 gap-2 text-shadow-md">
         <template
