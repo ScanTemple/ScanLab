@@ -1,5 +1,6 @@
 use anyhow::Result;
 use serde::{Deserialize, Serialize};
+use std::collections::HashMap;
 use ts_rs::TS;
 use uuid::Uuid;
 
@@ -12,6 +13,18 @@ mod split;
 #[ts(export)]
 pub struct StageData<T> {
     pub images: Vec<ImageInfo<T>>,
+    pub images_lookup: HashMap<Uuid, usize>,
+    pub current_image: Option<Uuid>,
+}
+
+impl<T> StageData<T> {
+    pub fn new() -> Self {
+        StageData {
+            images: vec![],
+            images_lookup: HashMap::new(),
+            current_image: None,
+        }
+    }
 }
 
 #[derive(Default, Debug, Clone, Serialize, Deserialize, TS)]
@@ -20,6 +33,16 @@ pub struct ImageInfo<T> {
     pub id: Uuid,
     pub parent_id: Option<Uuid>,
     pub params: T,
+    pub mode: ImageMode,
+}
+
+#[derive(Default, Debug, Clone, Serialize, Deserialize, TS)]
+#[ts(export)]
+pub enum ImageMode {
+    #[default]
+    Auto,
+    Manual,
+    Skip,
 }
 
 pub trait GenericStage {
@@ -27,19 +50,12 @@ pub trait GenericStage {
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, TS)]
-#[serde(tag = "type")]
+#[serde(tag = "type", rename_all = "camelCase")]
 #[ts(export)]
 pub enum ProcessingStage {
-    #[serde(rename = "open")]
     Open(open::OpenStage),
-
-    #[serde(rename = "rotate")]
     Rotate(rotate::RotateStage),
-
-    #[serde(rename = "split")]
     Split(split::SplitStage),
-
-    #[serde(rename = "save")]
     Save(save::SaveStage),
 }
 
@@ -50,7 +66,7 @@ impl ProcessingStage {
             "rotate" => Ok(ProcessingStage::Rotate(rotate::RotateStage::new())),
             "split" => Ok(ProcessingStage::Split(split::SplitStage::new())),
             "save" => Ok(ProcessingStage::Save(save::SaveStage::new())),
-            _ => Err(anyhow::anyhow!("Unknown stage type: {}", stage_type)),
+            _ => Err(anyhow::anyhow!("Unknown stage type: {stage_type}")),
         }
     }
 }
