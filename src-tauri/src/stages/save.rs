@@ -5,9 +5,3 @@ use ts_rs::TS;
 pub struct SaveParams {}
 
 pub type SaveStage = super::StageData<SaveParams>;
-
-impl super::GenericStage for SaveStage {
-    fn new() -> Self {
-        super::StageData { images: vec![] }
-    }
-}

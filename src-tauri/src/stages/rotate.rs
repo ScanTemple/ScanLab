@@ -7,9 +7,3 @@ pub struct RotateParams {
 }
 
 pub type RotateStage = super::StageData<RotateParams>;
-
-impl super::GenericStage for RotateStage {
-    fn new() -> Self {
-        super::StageData { images: vec![] }
-    }
-}

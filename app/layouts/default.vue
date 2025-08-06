@@ -81,7 +81,7 @@ const temp = useTempStore()
         </section>
       </aside>
 
-      <footer class="col-span-full">
+      <footer class="p-2 flex justify-center col-span-full border border-zinc-700 shadow leading-none row-start-2 backdrop-blur-[2px]">
         <fileprocess-stage />
       </footer>
     </section>

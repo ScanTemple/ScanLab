@@ -8,9 +8,3 @@ pub struct SplitParams {
 }
 
 pub type SplitStage = super::StageData<SplitParams>;
-
-impl super::GenericStage for SplitStage {
-    fn new() -> Self {
-        super::StageData { images: vec![] }
-    }
-}

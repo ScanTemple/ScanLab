@@ -14,10 +14,11 @@ const stageLayers = useStageLayersStore()
       />
 
       <icon
-        v-if="layer !== stageLayers.defined.at(-1)"
         name="ic:baseline-chevron-right"
         class="text-neutral-300/50"
       />
     </template>
+
+    <add-stage v-show="false" />
   </ul>
 </template>
