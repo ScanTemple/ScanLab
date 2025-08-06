@@ -1,15 +1,14 @@
 import { invoke } from '@tauri-apps/api/core'
-import type { ProcessingStage } from '~~/src-tauri/bindings/ProcessingStage'
+
+const isLoading = ref(false)
+const error = ref<string | null>(null)
 
 export const useCommands = () => {
-  const isLoading = ref(false)
-  const error = ref<string | null>(null)
-
   // Helper function to handle command execution
   const executeCommand = async <T>(
     commandName: string,
     args?: Record<string, unknown>,
-  ): Promise<T | null> => {
+  ): Promise<T | null | false> => {
     try {
       isLoading.value = true
       error.value = null
@@ -19,8 +18,8 @@ export const useCommands = () => {
     }
     catch (err) {
       error.value = err instanceof Error ? err.message : String(err)
-      console.error(`Command ${commandName} failed:`, err)
-      return null
+      console.error(`Command ${commandName} failed:`, error.value)
+      return false
     }
     finally {
       isLoading.value = false
@@ -32,19 +31,26 @@ export const useCommands = () => {
   // Create a new project with the given name and directory
   const createProject = async (name: string, dir: string): Promise<boolean> => {
     const result = await executeCommand<undefined>('create_project', { name, dir })
-    return result !== null
+
+    return null === result
   }
 
   // Create project in temp directory with default name
   const createTempProject = async (): Promise<boolean> => {
     const result = await executeCommand<undefined>('create_temp_project')
-    return result !== null
+    return result === null
+  }
+
+  // Opens dialog tooad an recent project
+  const loadRecentProject = async (path: string): Promise<boolean> => {
+    const result = await executeCommand<undefined>('load_recent_project', { projectPath: path })
+    return result === null
   }
 
   // Opens dialog tooad an existing project
   const loadProject = async (): Promise<boolean> => {
     const result = await executeCommand<undefined>('load_project')
-    return result !== null
+    return result === null
   }
 
   // Save the current project
@@ -80,7 +86,7 @@ export const useCommands = () => {
     position?: number,
   ): Promise<boolean> => {
     const result = await executeCommand<undefined>('drop_images', { paths, position })
-    return result !== null
+    return result === null
   }
 
   // Open images dialog to select images, accepts (optional) position to insert
@@ -90,19 +96,19 @@ export const useCommands = () => {
   }
 
   // Utility commands
-  //   const generateThumbnail = async (
-  //     sourcePath: string,
-  //     size: number,
-  //   ): Promise<string | null> => {
-  //     return await executeCommand<string>('generate_thumbnail_from_path', {
-  //       sourcePath,
-  //       size,
-  //     })
-  //   }
+  const generateThumbnail = async (
+    sourcePath: string,
+    size: number,
+  ): Promise<string | null | false> => {
+    return await executeCommand<string>('generate_thumbnail_from_path', {
+      sourcePath,
+      size,
+    })
+  }
 
-  //   const showImage = async (sourcePath: string): Promise<string | null> => {
-  //     return await executeCommand<string>('show_image', { sourcePath })
-  //   }
+  // const showImage = async (sourcePath: string): Promise<string | null> => {
+  //   return await executeCommand<string>('show_image', { sourcePath })
+  // }
 
   // Get available parallelism cores
   const getCpus = async (): Promise<number> => {
@@ -121,6 +127,8 @@ export const useCommands = () => {
     return result || null
   }
 
+  // error.value = 'Anime'
+
   return {
     // State
     isLoading: readonly(isLoading),
@@ -129,6 +137,7 @@ export const useCommands = () => {
     // Project methods
     createProject,
     createTempProject,
+    loadRecentProject,
     loadProject,
     saveProject,
 
@@ -142,7 +151,7 @@ export const useCommands = () => {
     openImages,
 
     // Utility methods
-    // generateThumbnail,
+    generateThumbnail,
     // showImage,
     getCpus,
     generateRandomName,

@@ -5,6 +5,7 @@
 <template>
   <NuxtLayout>
     <NuxtPage />
+    <StripBar />
     <ImagePreview />
   </NuxtLayout>
 </template>
