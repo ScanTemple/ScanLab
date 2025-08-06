@@ -4,7 +4,7 @@
       <slot />
     </main>
 
-    <footer class="p-2 flex justify-center bg-zinc-800/30 shadow sticky bottom-2 leading-none backdrop-blur-md">
+    <footer>
       <fileprocess-stage />
     </footer>
   </section>

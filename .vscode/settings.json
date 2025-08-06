@@ -16,6 +16,7 @@
     "**/.zed": true,
     "**/src-tauri/target": true,
     "**/src-tauri/gen": true,
+    "**/app/.declarations": true,
   },
   "files.associations": {
     "*.css": "tailwindcss"
