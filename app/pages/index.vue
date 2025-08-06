@@ -1,93 +1,148 @@
 <script setup lang="ts">
-import { invoke } from '@tauri-apps/api/core'
-import { open } from '@tauri-apps/plugin-dialog'
+import type { TauriEvent } from '@tauri-apps/api/event'
+import { listen } from '@tauri-apps/api/event'
+import { getCurrentWebview, type DragDropEvent } from '@tauri-apps/api/webview'
 
 definePageMeta({
   layout: 'project',
 })
 
-const newProjectName = ref('')
-const newProjectDirectory = ref('' as string)
-
+const newProjectName = ref(await useCommands().generateRandomName())
+const newProjectDirectory = ref(faker.system.directoryPath())
+//
 // Generate 5 fake recent projects
-const recent = ref<string[]>(Array.from({ length: 5 }, () => faker.commerce.productName()))
+const recent = ref(Array.from({ length: 5 }, () => ({
+  uuid: faker.string.uuid(),
+  name: faker.commerce.productName(),
+  path: 'Q:\\Users\\sawic\\OneDrive\\Рабочий стол\\RAW\\boundless-sheep.ScanLab',
+  date: faker.date.recent({ days: 10 }),
+})))
 
-const generateProjectName = async () => {
-  newProjectName.value = await invoke<string>('generate_random_name')
+async function naviagetTo() {
+  const project = useProjectStore()
+
+  await project.refreshStages()
+  const x = project.projectStages[0]
+
+  const router = useRouter()
+  await router.push({ path: '/open' })
 }
-
-const showCreateModal = ref(false)
 
 async function createProject() {
-  await invoke('create_project', {
-    name: newProjectName.value,
-    dir: newProjectDirectory.value,
-  }).then(() => {
-    showCreateModal.value = false
-  }).catch((error) => {
-    console.error('Error creating project:', error)
-  })
-}
+  const commands = useCommands()
+  const value = await commands.createProject(newProjectName.value, newProjectDirectory.value)
 
-async function loadProject() {
-  const selectedFile = await open({ multiple: false })
-  if (selectedFile) {
-    await invoke('load_project', { path: selectedFile })
-      .then(() => {
-        console.log('Project loaded successfully')
-      })
-      .catch((error) => {
-        console.error('Error opening project:', error)
-      })
-
-    await invoke('add_stage', { stage: 'rotate' })
-
-    await invoke('list_stages')
-      .then((result) => {
-        const stages = result as ProcessingStage[]
-        console.log('Available stages:', stages)
-      })
-
-    await invoke('get_stage', { index: 1 })
-      .then((result) => {
-        const stage = result as ProcessingStage
-        console.log('Stage at index 1:', stage)
-      })
+  if (value) {
+    await naviagetTo()
   }
 }
 
-async function createTempProject() {
-  await invoke('create_temp_project')
-    .then(() => {
-      console.log('Temporary project created successfully')
-    })
-    .catch((error) => {
-      console.error('Error creating temporary project:', error)
-    })
+async function loadProject() {
+  const commands = useCommands()
+  const value = await commands.loadProject()
+
+  if (value) {
+    await naviagetTo()
+  }
+}
+
+async function loadRecent(path: string) {
+  const commands = useCommands()
+  const value = await commands.loadRecentProject(path)
+
+  if (value) {
+    await naviagetTo()
+  }
 }
 
 async function selectSaveFolder() {
-  const selected = await open({ directory: true })
+  const commands = useCommands()
+  const selected = await commands.selectDirectory()
   if (selected) {
     newProjectDirectory.value = selected
   }
 }
 
-onMounted(() => {
-  console.log({ angle: 0 } as RotateParams)
+const unlisten = await getCurrentWebview().onDragDropEvent(async (e) => {
+  if (e.payload.type === 'drop') {
+    const commands = useCommands()
+    if (!(await commands.createTempProject())) {
+      return
+    }
+
+    if (!(await commands.dropImages(e.payload.paths))) {
+      return
+    }
+
+    await naviagetTo()
+  }
+})
+
+onBeforeUnmount(() => {
+  unlisten()
+})
+
+const isFormValid = computed(() => {
+  return !!newProjectName.value && !!newProjectDirectory.value
 })
 </script>
 
 <template>
   <section class="grid grid-cols-2 size-full gap-2">
     <div class="flex flex-col items-center justify-center gap-2 group relative">
-      <ui-button
-        class="text-xl"
-        @click="showCreateModal = true; generateProjectName()"
-      >
-        <icon name="ic:baseline-create-new-folder" />
-        <span>Create New Project</span>
-      </ui-button>
+      <ui-modal-window>
+        <template #trigger="{ show, state }">
+          <ui-button
+            class="text-xl"
+            @click="show()"
+          >
+            <icon name="ic:baseline-create-new-folder" />
+            <span>Create New Project: {{ state }}</span>
+          </ui-button>
+        </template>
+
+        <template #header>
+          <section class="flex gap-2 justify-between items-center">
+            <span>New project</span>
+
+            <ui-button
+              id="create"
+              :disabled="!isFormValid"
+              @click="createProject"
+            >
+              Create
+            </ui-button>
+          </section>
+        </template>
+
+        <template #body>
+          <form class="space-y-2">
+            <section class="flex gap-2">
+              <ui-input
+                id="name"
+                v-model="newProjectName"
+                placeholder="Project name"
+                class="w-[50dvw]"
+              />
+
+              <ui-button
+                id="dir"
+                @click="selectSaveFolder"
+              >
+                Select directory
+              </ui-button>
+            </section>
+
+            <p
+              v-show="newProjectDirectory"
+              class="inline-flex items-center gap-2 px-2 italic text-neutral-300/50"
+            >
+              <icon name="ic:baseline-folder" />
+              <span>{{ newProjectDirectory }}</span>
+            </p>
+          </form>
+        </template>
+      </ui-modal-window>
 
       <div class="flex items-center w-full gap-2">
         <div class="flex-grow h-px bg-zinc-700 group-hover:bg-zinc-600 transition-colors" />
@@ -109,32 +164,32 @@ onMounted(() => {
       </div>
     </div>
 
-    <aside class="p-2 backdrop-blur-[2px] border border-zinc-700 hover:border-zinc-600 transition-colors shadow-md">
+    <aside class="p-2 backdrop-blur-[2px] border border-zinc-700 hover:border-zinc-600 transition-colors shadow-md flex flex-col overflow-hidden">
       <header class="text-center font-mono px-2 text-lg mb-2 uppercase">
         Recent projects
       </header>
 
-      <section>
-        <ul>
+      <section class="">
+        <ul class="">
           <li
             v-for="project in recent"
-            :key="project"
+            :key="project.uuid"
           >
             <ui-button
-              class="flex gap-2"
-              @click="newProjectName = project"
+              class="flex gap-2 w-full"
+              @click="loadRecent(project.path)"
             >
-              <span class="truncate text-start text-indigo-300/50 group-hover/button:text-indigo-300 transition-colors">
-                {{ project }}
+              <span class="text-nowrap text-start text-indigo-300/50 group-hover/button:text-indigo-300 transition-colors">
+                {{ project.name }}
               </span>
 
-              <span class="truncate text-start font-mono grow text-xs">
-                {{ faker.system.filePath() }}
+              <span class="truncate text-start font-mono text-xs">
+                {{ project.path }}
               </span>
 
-              <span class="truncate text-end font-mono">
+              <span class="text-end font-mono text-xs">
                 {{
-                  faker.date.recent({ days: 10 }).toLocaleDateString(undefined, {
+                  project.date.toLocaleDateString(undefined, {
                     year: "numeric",
                     month: "2-digit",
                     day: "2-digit",
