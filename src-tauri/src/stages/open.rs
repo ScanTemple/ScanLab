@@ -5,6 +5,7 @@ use uuid::Uuid;
 // use uuid::Uuid;
 
 #[derive(Default, Debug, Clone, Serialize, Deserialize, TS)]
+#[ts(export, export_to = "index.ts")]
 pub struct OpenParams {
     pub file_path: String,
 }
