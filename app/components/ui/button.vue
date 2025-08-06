@@ -5,7 +5,7 @@ defineProps<{
 }>()
 
 const styles = tv({
-  base: 'leading-none gap-[1ch] transition-colors p-2 flex items-center w-full text-shadow-md group/button',
+  base: 'leading-none gap-[1ch] transition-colors p-2 flex items-center text-shadow-md group/button',
   variants: {
     disabled: {
       true: 'pointer-events-none text-zinc-300/10',
